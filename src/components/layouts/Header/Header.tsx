@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import classNames from "classnames/bind";
 
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import headerRoutes from "./headerRoutes";
 import styles from "./Header.module.scss";
 
 const cx = classNames.bind(styles);
@@ -13,6 +18,7 @@ export default function Header() {
   const tailwindHeaderClass =
     "flex items-center justify-between bg-white shadow-md fixed top-0 left-0 w-full z-50";
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header
@@ -26,23 +32,39 @@ export default function Header() {
         })}
       >
         {/* Logo */}
-        <div className="text-xl font-bold text-blue-900">NHẬT ANH LOGO</div>
+        <Link
+          href={headerRoutes.home.href}
+          className="flex items-center text-xl font-bold text-blue-900"
+        >
+          NHẬT ANH
+          <Image
+            src="/logo.jpg"
+            width={50}
+            height={50}
+            alt="Logo"
+            className="ml-2"
+          />
+        </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6 text-orange-600 font-semibold">
-          <a href="#" className="border-b-2 border-orange-600 pb-1">
-            Trang chủ
-          </a>
-          <a href="#">Giới thiệu</a>
-          <a href="#">Khám phá</a>
-          <a href="#">Thông số kỹ thuật</a>
-          <a href="#">Sản phẩm</a>
-          <a href="#">Hỗ trợ</a>
+        <nav className="flex space-x-6 text-orange-600 font-semibold">
+          {Object.keys(headerRoutes).map((route) => (
+            <Link
+              key={route}
+              href={headerRoutes[route].href}
+              className={`relative pb-1 transition-all duration-300 ${
+                pathname === headerRoutes[route].href
+                  ? "border-b-2 border-orange-600"
+                  : "hover:border-b-2 hover:border-orange-600"
+              }`}
+            >
+              {headerRoutes[route].label}
+            </Link>
+          ))}
         </nav>
 
         {/* Search Icon & Mobile Menu Button */}
         <div className="flex items-center text-red-600 space-x-4">
-          <a className="hidden md:flex font-semibold" href="#">
+          <a className="hidden md:flex font-semibold" href="tel:0914488248">
             Hotline: 0914488248
           </a>
           {/* Search Icon */}

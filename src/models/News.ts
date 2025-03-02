@@ -1,9 +1,9 @@
-export interface Category {
+export interface News {
   id: number;
-  name: string;
+  title: string;
   slug: string;
   image: string;
-  description: string;
+  content: string;
   status: number;
   created_at: string;
   updated_at: string;

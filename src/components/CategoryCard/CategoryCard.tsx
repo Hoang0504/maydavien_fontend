@@ -1,36 +1,33 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import classNames from "classnames/bind";
-import { getImageResource } from "@/utils";
-import styles from "./CategoryCard.module.scss";
 
-interface CategoryCardProps {
-  title: string;
-  image: string;
-  description: string;
-}
+import { getImageResource } from "@/utils";
+import { Category } from "@/models/Category";
+import routes from "@/config";
+
+import styles from "./CategoryCard.module.scss";
 
 const cx = classNames.bind(styles);
 
-export default function CategoryCard({
-  title,
-  image,
-  description,
-}: CategoryCardProps) {
+export default function CategoryCard(category: Category) {
   return (
-    <div className="flex flex-col items-center text-center space-y-4">
-      <h3 className="font-bold text-lg">{title}</h3>
+    <Link
+      href={`${routes.categories}/${category.slug}`}
+      className="flex flex-col items-center text-center space-y-4"
+    >
+      <h3 className="font-bold text-lg">{category.name}</h3>
       <Image
-        src={getImageResource(image)}
-        alt={title}
+        src={getImageResource(category.image)}
+        alt={category.slug}
         width={200}
         height={200}
-        className={cx("card-image", {
-          "object-contain": true,
-        })}
+        className={cx("card-image", "object-contain")}
+        unoptimized
       />
-      <p className="text-gray-600">{description}</p>
-    </div>
+      <p className="text-gray-600">{category.description}</p>
+    </Link>
   );
 }

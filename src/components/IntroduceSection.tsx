@@ -5,7 +5,7 @@ import { Introduce } from "@/models/Introduce";
 import { getIntroduces } from "@/services/introduceService";
 import IntroduceBox from "./IntroduceBox";
 
-function IntroduceSection() {
+function IntroduceSection({ id }: { id: string }) {
   const [introduces, setIntroduces] = useState<Introduce[]>([]);
 
   useEffect(() => {
@@ -15,11 +15,11 @@ function IntroduceSection() {
   }, []);
 
   return (
-    <>
+    <div id={id}>
       {introduces.map((introduce: Introduce, index: number) => (
         <IntroduceBox key={introduce.id} introduce={introduce} index={index} />
       ))}
-    </>
+    </div>
   );
 }
 

@@ -27,7 +27,7 @@ export default function IntroduceBox({
           {/* Nội dung */}
           <div
             className={`w-full ${
-              introduce.type !== 1 && "md:w-1/2 shadow-lg"
+              introduce.type !== 1 && "md:w-3/5 shadow-lg"
             } ${bgColor} p-6 rounded-lg text-center`}
           >
             <h2 className="text-xl font-bold mb-3">{introduce.title}</h2>
@@ -47,7 +47,7 @@ export default function IntroduceBox({
             className={` flex justify-center`}
           > */}
           <Image
-            className={`${introduce.type === 1 ? "w-full" : "w-1/2"}`}
+            className={`${introduce.type === 1 ? "w-full" : "md:w-2/5"}`}
             src={getImageResource(introduce.image)}
             alt={introduce.title}
             width={500}

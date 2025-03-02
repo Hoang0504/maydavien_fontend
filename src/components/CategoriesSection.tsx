@@ -8,7 +8,7 @@ import { Category } from "@/models/Category";
 import { getCategories } from "@/services/categoryService";
 import CategoryCard from "./CategoryCard";
 
-export default function CategoriesSection() {
+export default function CategoriesSection({ id }: { id: string }) {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function CategoriesSection() {
   }, []);
 
   return (
-    <div className="text-center py-10">
+    <div id={id} className="text-center py-10">
       <h2 className="text-2xl font-bold mb-6">MÁY LÀM ĐÁ VIÊN NHẬT ANH</h2>
       <div className="mx-8">
         <Swiper
@@ -33,11 +33,7 @@ export default function CategoriesSection() {
         >
           {categories.map((category, index) => (
             <SwiperSlide key={index}>
-              <CategoryCard
-                title={category.name}
-                image={category.image}
-                description={category.description}
-              />
+              <CategoryCard {...category} />
             </SwiperSlide>
           ))}
         </Swiper>
