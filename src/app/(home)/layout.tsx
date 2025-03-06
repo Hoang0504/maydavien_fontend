@@ -10,7 +10,6 @@ import Header from "@/components/layouts/Header";
 import Footer from "@/components/layouts/Footer";
 import Loading from "@/components/Loading";
 
-import { ThemeProvider } from "@/context/ThemeContext";
 import { LoadingProvider } from "@/context/loadingContext";
 
 import styles from "../body.module.scss";
@@ -40,14 +39,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <ThemeProvider>
-          <LoadingProvider>
-            <Loading />
-            <Header />
-            <div className={cx("body-content")}>{children}</div>
-            <Footer />
-          </LoadingProvider>
-        </ThemeProvider>
+        <LoadingProvider>
+          <Loading />
+          <Header />
+          <div className={cx("body-content")}>{children}</div>
+          <Footer />
+        </LoadingProvider>
         <Script
           src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.7/viewer.min.js"
           integrity="sha512-lZD0JiwhtP4UkFD1mc96NiTZ14L7MjyX5Khk8PMxJszXMLvu7kjq1sp4bb0tcL6MY+/4sIuiUxubOqoueHrW4w=="
