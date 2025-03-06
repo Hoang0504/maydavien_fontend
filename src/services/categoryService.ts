@@ -1,20 +1,11 @@
-import { fetcher } from "./api";
-import { ApiResponse } from "@/models/ApiResponse";
-import { Category } from "@/models/Category";
+import { handleGetDataApi } from "@/utils";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/categories`;
 
-export const getCategories = async (): Promise<ApiResponse<Category[]>> => {
-  const data = await fetcher(API_GET_URL);
-  return data;
-};
+export const getCategories = async () => handleGetDataApi(API_GET_URL);
 
-export async function getCategoriesById(id: number) {
-  const res = await fetcher(`${API_GET_URL}/${id}`);
-  return res.data;
-}
+export const getCategoriesById = async (id: number) =>
+  handleGetDataApi(`${API_GET_URL}/${id}`);
 
-export async function getCategoryBySlug(slug: string) {
-  const res = await fetcher(`${API_GET_URL}/slug/${slug}`);
-  return res.data;
-}
+export const getCategoryBySlug = async (slug: string) =>
+  handleGetDataApi(`${API_GET_URL}/slug/${slug}`);

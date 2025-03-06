@@ -1,8 +1,8 @@
 "use client";
 
-import { Introduce } from "@/models/Introduce";
-import { getImageResource } from "@/utils";
 import Image from "next/image";
+
+import { Introduce } from "@/models/Introduce";
 
 export default function IntroduceBox({
   introduce,
@@ -34,7 +34,7 @@ export default function IntroduceBox({
             <p className="text-gray-700 mb-4">{introduce.description}</p>
             {introduce.link_title && introduce.link_url && (
               <a
-                href={introduce.link_url}
+                href="tel:0914488248"
                 className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg font-bold"
               >
                 {introduce.link_title}
@@ -48,11 +48,11 @@ export default function IntroduceBox({
           > */}
           <Image
             className={`${introduce.type === 1 ? "w-full" : "md:w-2/5"}`}
-            src={getImageResource(introduce.image)}
+            src={introduce.image}
             alt={introduce.title}
             width={500}
             height={300}
-            unoptimized
+            loading="lazy"
           />
           {/* </div> */}
         </div>

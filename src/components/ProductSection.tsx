@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { Product } from "@/models/Product";
 import { Category } from "@/models/Category";
 import { getProducts } from "@/services/productService";
+import { useLoading } from "@/context/loadingContext";
 import ProductBox from "./ProductBox";
+import PaginationBar from "./PaginationBar";
 
 function ProductSection({
   id,
@@ -13,23 +16,31 @@ function ProductSection({
   id?: string;
   category?: Category;
 }) {
+  const { setLoading } = useLoading();
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 8;
-  const [totalPages, setTotalPages] = useState<number>();
+  const [totalPages, setTotalPages] = useState<number>(0);
+
+  const fetchProductsData = async () => {
+    setLoading(true);
+    const data = await getProducts({
+      page,
+      pageSize,
+      categoryId: category?.id,
+    });
+    setProducts(data.data);
+    setTotalPages(data.total_pages ? parseInt(data.total_pages.toString()) : 0);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    getProducts({ page, pageSize, categoryId: category?.id })
-      .then((res) => {
-        setProducts(res.data);
-        setTotalPages(res.total_pages);
-      })
-      .catch(console.error);
-  }, [page, category]);
+    fetchProductsData();
+  }, [page, pageSize, category?.id]);
 
-  const nextPage = () =>
-    setPage((prev) => (prev < totalPages! ? prev + 1 : prev));
-  const prevPage = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
+  const setPageOfPagination = useCallback((page: number) => {
+    setPage(page);
+  }, []);
 
   return (
     <section id={id} className="container mx-auto py-10">
@@ -42,37 +53,11 @@ function ProductSection({
           <ProductBox key={product.id} product={product} />
         ))}
       </div>
-      <div className="flex justify-center mt-10 gap-4">
-        <button
-          onClick={prevPage}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg"
-          disabled={page === 1}
-        >
-          Previous
-        </button>
-        {Array.from({ length: totalPages! }, (_, index) => index + 1).map(
-          (pageNumber) => (
-            <button
-              key={pageNumber}
-              onClick={() => setPage(pageNumber)}
-              className={`px-4 py-2 rounded-lg ${
-                page === pageNumber
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-            >
-              {pageNumber}
-            </button>
-          )
-        )}
-        <button
-          onClick={nextPage}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg"
-          disabled={page === totalPages}
-        >
-          Next
-        </button>
-      </div>
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        setPage={setPageOfPagination}
+      />
     </section>
   );
 }

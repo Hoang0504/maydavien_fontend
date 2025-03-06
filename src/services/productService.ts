@@ -1,5 +1,5 @@
-import { fetcher } from "./api";
 import { Product } from "@/models/Product";
+import { handleGetDataApi } from "@/utils";
 import { ApiResponse } from "@/models/ApiResponse";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/products`;
@@ -23,6 +23,9 @@ export const getProducts = async (
   if (query.categoryId)
     url.searchParams.append("categoryId", query.categoryId.toString());
 
-  const data = await fetcher(url.toString());
+  const data = await handleGetDataApi(url.toString());
   return data;
 };
+
+export const getProductBySlug = async (slug: string) =>
+  handleGetDataApi(`${API_GET_URL}/slug/${slug}`);

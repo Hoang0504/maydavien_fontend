@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+
 import { Product } from "@/models/Product";
-import { getImageResource } from "@/utils";
+import routes from "@/config";
 
 interface ProductBoxProps {
   product: Product;
@@ -10,15 +12,18 @@ interface ProductBoxProps {
 
 function ProductBox({ product }: ProductBoxProps) {
   return (
-    <div className="border rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow">
-      <div className="relative w-full h-64 mb-4">
+    <Link
+      href={`${routes.products}/${product.slug}`}
+      className="border rounded-lg p-4 shadow-lg hover:shadow-xl transition hover:scale-105"
+    >
+      <div className="relative w-full h-[400px] md:h-64 mb-4">
         <Image
-          src={getImageResource(product.image)}
+          src={product.image}
           alt={product.name}
           layout="fill"
           objectFit="cover"
           className="rounded-lg"
-          unoptimized
+          loading="lazy"
         />
       </div>
       <h3 className="text-lg font-bold text-center mb-2">{product.name}</h3>
@@ -32,7 +37,7 @@ function ProductBox({ product }: ProductBoxProps) {
           {product.price.toLocaleString()} đ
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
 

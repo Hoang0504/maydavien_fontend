@@ -1,17 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import IntroduceBox from "./IntroduceBox";
 import { Introduce } from "@/models/Introduce";
 import { getIntroduces } from "@/services/introduceService";
-import IntroduceBox from "./IntroduceBox";
+import { useLoading } from "@/context/loadingContext";
 
 function IntroduceSection({ id }: { id: string }) {
+  const { setLoading } = useLoading();
   const [introduces, setIntroduces] = useState<Introduce[]>([]);
 
+  const fetchIntroducesData = async () => {
+    setLoading(true);
+    const data = await getIntroduces();
+    setIntroduces(data.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    getIntroduces()
-      .then((b) => setIntroduces(b.data))
-      .catch(console.error);
+    fetchIntroducesData();
   }, []);
 
   return (

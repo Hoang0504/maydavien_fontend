@@ -16,7 +16,7 @@ const cx = classNames.bind(styles);
 
 export default function Header() {
   const tailwindHeaderClass =
-    "flex items-center justify-between bg-white shadow-md fixed top-0 left-0 w-full z-50";
+    "flex items-center justify-between bg-white shadow-md fixed top-0 left-0 w-full z-50 px-4";
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -46,7 +46,13 @@ export default function Header() {
           />
         </Link>
 
-        <nav className="flex space-x-6 text-orange-600 font-semibold">
+        <nav
+          className={`md:flex text-orange-600 font-semibold transition-all duration-300 ${
+            menuOpen
+              ? "fixed top-0 left-0 right-0 max-h-1/2 overflow-y-auto bg-white z-1 flex flex-col shadow-lg"
+              : "md:space-x-6 hidden"
+          }`}
+        >
           {Object.keys(headerRoutes).map((route) => (
             <Link
               key={route}
@@ -55,7 +61,8 @@ export default function Header() {
                 pathname === headerRoutes[route].href
                   ? "border-b-2 border-orange-600"
                   : "hover:border-b-2 hover:border-orange-600"
-              }`}
+              } ${menuOpen ? "mx-3 py-3" : ""}`}
+              onClick={() => setMenuOpen(false)}
             >
               {headerRoutes[route].label}
             </Link>
@@ -76,58 +83,16 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden text-xl text-gray-600"
+            className={`md:hidden text-xl text-gray-600 ${
+              menuOpen
+                ? "fixed top-[2px] right-[12px] w-[36px] h-[36px] bg-white border border-solid z-2"
+                : ""
+            }`}
           >
             <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {menuOpen && (
-        <nav className="md:hidden bg-white text-orange-600 font-semibold border-t border-gray-200">
-          <ul className="flex flex-col space-y-2 p-4">
-            <li>
-              <a
-                href="#"
-                className="block py-2 px-4 border-b border-orange-600"
-              >
-                Trang chủ
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Giới thiệu
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Khám phá
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Thông số kỹ thuật
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Sản phẩm
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Hỗ trợ
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block py-2 px-4">
-                Hotline: 1900 17 72
-              </a>
-            </li>
-          </ul>
-        </nav>
-      )}
     </header>
   );
 }

@@ -4,17 +4,36 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { News } from "@/models/News";
-import { getImageResource } from "@/utils";
 import { getNews } from "@/services/newsService";
+import { useLoading } from "@/context/loadingContext";
+import NotFoundPage from "@/components/NotFoundPage";
+import PaginationBar from "@/components/PaginationBar";
 
 export default function NewsPage() {
+  const { setLoading } = useLoading();
   const [news, setNews] = useState<News[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const [totalPages, setTotalPages] = useState<number>(0);
+
+  const fetchNewsData = async () => {
+    setLoading(true);
+    const data = await getNews({
+      page,
+      pageSize,
+    });
+    setNews(data.data);
+    setTotalPages(data.total_pages ? parseInt(data.total_pages.toString()) : 0);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    getNews()
-      .then((res) => setNews(res))
-      .catch(console.error);
-  }, []);
+    fetchNewsData();
+  }, [page]);
+
+  if (!news) {
+    return <NotFoundPage />;
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -25,16 +44,28 @@ export default function NewsPage() {
             key={item.id}
             className="flex border rounded-lg shadow-lg overflow-hidden"
           >
-            <Image
-              src={getImageResource(item.image)}
-              alt={item.title}
-              width={300}
-              height={200}
-              className="object-cover w-1/3 h-[350px]"
-              unoptimized
-            />
+            <Link
+              href={`/news/${item.slug}`}
+              className="text-red-600 font-semibold w-1/3"
+            >
+              <Image
+                src={item.image}
+                alt={item.title}
+                width={300}
+                height={200}
+                className="object-cover w-full h-[300px]"
+                loading="lazy"
+              />
+            </Link>
+
             <div className="p-4 w-2/3">
-              <h2 className="text-xl font-bold mb-2">{item.title}</h2>
+              <Link
+                href={`/news/${item.slug}`}
+                className="text-red-600 font-semibold"
+              >
+                <h2 className="text-xl font-bold mb-2">{item.title}</h2>
+              </Link>
+
               <p className="text-sm text-gray-600 mb-4 line-clamp-4">
                 {item.content}
               </p>
@@ -42,12 +73,14 @@ export default function NewsPage() {
                 href={`/news/${item.slug}`}
                 className="text-red-600 font-semibold"
               >
-                Read More
+                Xem thêm
               </Link>
             </div>
           </div>
         ))}
       </div>
+
+      <PaginationBar page={page} totalPages={totalPages} setPage={setPage} />
     </div>
   );
 }

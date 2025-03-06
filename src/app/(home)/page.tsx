@@ -6,10 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { News } from "@/models/News";
-import { getImageResource } from "@/utils";
 import { getLatestNews } from "@/services/newsService";
 
-// import { useLoading } from "@/context/loadingContext";
+import { useLoading } from "@/context/loadingContext";
 import routes from "@/config";
 import Banner from "@/components/Banner";
 import CategoriesSection from "@/components/CategoriesSection";
@@ -17,17 +16,23 @@ import IntroduceSection from "@/components/IntroduceSection";
 import ProductSection from "@/components/ProductSection";
 import TestimonialSection from "@/components/TestimonialSection";
 
-import styles from "./body.module.scss";
+import styles from "../body.module.scss";
 
 const cx = classNames.bind(styles);
 
 export default function Home() {
+  const { setLoading } = useLoading();
   const [news, setNews] = useState<News[]>([]);
 
+  const fetchNewsData = async () => {
+    setLoading(true);
+    const data = await getLatestNews();
+    setNews(data.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    getLatestNews()
-      .then((n) => setNews(n.data))
-      .catch(console.error);
+    fetchNewsData();
   }, []);
 
   return (
@@ -45,14 +50,18 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-4">TIN TỨC MỚI NHẤT</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide">
             {news.map((item) => (
-              <Link key={item.id} href={`${routes.news}/${item.slug}`}>
+              <Link
+                key={item.id}
+                href={`${routes.news}/${item.slug}`}
+                className="shadow-lg"
+              >
                 <Image
-                  src={getImageResource(item.image)}
+                  src={item.image}
                   alt={item.title}
                   width={300}
                   height={200}
                   className="rounded-lg w-full h-[250px] object-cover"
-                  unoptimized
+                  loading="lazy"
                 />
                 <h3 className="mt-2 text-center">{item.title}</h3>
               </Link>

@@ -6,16 +6,26 @@ import { Navigation } from "swiper/modules";
 
 import { Category } from "@/models/Category";
 import { getCategories } from "@/services/categoryService";
+import { useLoading } from "@/context/loadingContext";
 import CategoryCard from "./CategoryCard";
+import NotFoundPage from "./NotFoundPage";
 
 export default function CategoriesSection({ id }: { id: string }) {
+  const { setLoading } = useLoading();
   const [categories, setCategories] = useState<Category[]>([]);
 
+  const fetchCategoriesData = async () => {
+    setLoading(true);
+    const data = await getCategories();
+    setCategories(data.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    getCategories()
-      .then((b) => setCategories(b.data))
-      .catch(console.error);
+    fetchCategoriesData();
   }, []);
+
+  if (!categories) return <NotFoundPage />;
 
   return (
     <div id={id} className="text-center py-10">
@@ -24,7 +34,7 @@ export default function CategoriesSection({ id }: { id: string }) {
         <Swiper
           modules={[Navigation]}
           spaceBetween={20}
-          slidesPerView={2}
+          slidesPerView={1}
           navigation
           breakpoints={{
             640: { slidesPerView: 2 },

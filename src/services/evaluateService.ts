@@ -1,6 +1,6 @@
-import { fetcher } from "./api";
-import { ApiResponse } from "@/models/ApiResponse";
+import { handleGetDataApi } from "@/utils";
 import { Evaluate } from "@/models/Evaluate";
+import { ApiResponse } from "@/models/ApiResponse";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/evaluates`;
 
@@ -13,6 +13,6 @@ export const getEvaluates = async (params?: {
   ).toString();
   const url = query ? `${API_GET_URL}?${query}` : API_GET_URL;
 
-  const data = await fetcher(url);
+  const data = await handleGetDataApi(url);
   return data;
 };

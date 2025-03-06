@@ -6,20 +6,29 @@ import "swiper/css/navigation";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
-
 import Image from "next/image";
+
 import { Banner as BannerModel } from "@/models/Banner";
 import { getBanners } from "@/services/bannerService";
-import { getImageResource } from "@/utils";
+import { useLoading } from "@/context/loadingContext";
+import NotFoundPage from "./NotFoundPage";
 
 function Banner() {
+  const { setLoading } = useLoading();
   const [banners, setBanners] = useState<BannerModel[]>([]);
 
+  const fetchBannersData = async () => {
+    setLoading(true);
+    const data = await getBanners();
+    setBanners(data.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    getBanners()
-      .then((b) => setBanners(b.data))
-      .catch(console.error);
+    fetchBannersData();
   }, []);
+
+  if (!banners) return <NotFoundPage />;
 
   return (
     <Swiper
@@ -37,13 +46,12 @@ function Banner() {
         <SwiperSlide key={index}>
           <div className="relative w-full h-[400px]">
             <Image
-              src={getImageResource(banner.image)}
+              src={banner.image}
               alt={banner.title}
               width={1920}
               height={400}
               className="w-full h-[500px] object-cover"
-              priority
-              unoptimized
+              loading="lazy"
             />
           </div>
         </SwiperSlide>

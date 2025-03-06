@@ -12,13 +12,15 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.7.9",
+    "framer-motion": "^12.4.7",
     "next": "14.2.24",
     "react": "^18",
     "react-dom": "^18",
-    "react-spinners": "^0.15.0",
-    "swiper": "^11.2.4"
+    "swiper": "^11.2.4",
+    "viewerjs": "^1.11.7"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
