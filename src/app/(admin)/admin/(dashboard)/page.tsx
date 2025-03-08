@@ -87,7 +87,6 @@ export default function BannerManagement() {
           response = await updateBanner({ ...validation.data, id }, adminToken);
         }
       }
-      console.log(response);
       if (response) {
         if (response.error) {
           if (response.message === "Banner title already exists.") {
@@ -138,7 +137,6 @@ export default function BannerManagement() {
     setTitle(banner.title);
     setSubTitle(banner.sub_title || "");
     setImage(getFilenameAndExtension(banner.image));
-    // console.log(banner.image);
 
     setImagePreview(banner.image);
     setTextError("");
