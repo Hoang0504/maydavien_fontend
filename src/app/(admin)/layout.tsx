@@ -4,6 +4,7 @@ import React from "react";
 import { Metadata } from "next";
 
 import { SidebarProvider } from "@/context/SidebarContext";
+import AuthenticationProvider from "@/context/AuthenticationContext";
 
 export const metadata: Metadata = {
   title: "Admin máy đá viên Nhật Anh",
@@ -17,9 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body>
-        <SidebarProvider>{children}</SidebarProvider>
+        <AuthenticationProvider>
+          <SidebarProvider>{children}</SidebarProvider>
+        </AuthenticationProvider>
       </body>
     </html>
   );

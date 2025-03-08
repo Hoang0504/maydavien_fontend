@@ -6,6 +6,10 @@ const routes = {
   categories: "/categories",
   categoriesMenu: "/#categories",
   news: "/news",
+  admin: {
+    login: "/admin/login",
+    banner: "/admin",
+  },
 };
 
 export default routes;
