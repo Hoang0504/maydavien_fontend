@@ -3,8 +3,8 @@ import "../globals.css";
 import React from "react";
 import { Metadata } from "next";
 
-import { SidebarProvider } from "@/context/SidebarContext";
-import AuthenticationProvider from "@/context/AuthenticationContext";
+import SidebarProvider from "@/context/sidebarContext";
+import AuthenticationProvider from "@/context/authenticationContext";
 
 export const metadata: Metadata = {
   title: "Admin máy đá viên Nhật Anh",

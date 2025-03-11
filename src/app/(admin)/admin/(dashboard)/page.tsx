@@ -3,37 +3,42 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { getFilenameAndExtension } from "@/utils";
-import { useLoading } from "@/context/loadingContext";
 import {
   createBanner,
   deleteBanner,
   getBanners,
+  restoreBanner,
   updateBanner,
 } from "@/services/bannerService";
+
+import { getFilenameAndExtension, normalizeObject } from "@/utils";
 import { deleteImage, uploadImages } from "@/services/imageService";
-import { Banner as BannerModel } from "@/models/Banner";
-import { useAuthentication } from "@/context/AuthenticationContext";
+import { Banner, Banner as BannerModel } from "@/models/Banner";
+import { useAuthentication } from "@/context/authenticationContext";
 import { validateBannerForm, validateImageUpload } from "@/validates/admin";
+
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import NotFoundPage from "@/components/NotFoundPage";
 import DialogTitle from "@/components/ui/DialogTitle";
+import PaginationBar from "@/components/PaginationBar";
 import DialogContent from "@/components/ui/DialogContent";
 
 export default function BannerManagement() {
-  const { setLoading } = useLoading();
-  const { adminToken } = useAuthentication();
+  const { adminToken, handleAdminLogout } = useAuthentication();
   const [banners, setBanners] = useState<BannerModel[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("");
-  // const [selectedBanner, setSelectedBanner] = useState<BannerModel>();
   const [id, setId] = useState(0);
   const [title, setTitle] = useState("");
   const [subTitle, setSubTitle] = useState("");
   const [image, setImage] = useState<string>("");
+  const [newEditImage, setNewEditImage] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [textError, setTextError] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   const handleClickAddBannerButton = () => {
     setModalType("add");
@@ -47,6 +52,24 @@ export default function BannerManagement() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+
+    if (modalType === "edit" && newEditImage) {
+      const response = await deleteImage(
+        newEditImage,
+        adminToken,
+        "banner",
+        handleAdminLogout
+      );
+      if (response) {
+        setImage("");
+        setImagePreview("");
+        setTextError("");
+        return;
+      }
+      setTextError("Không thể xóa được ảnh này!");
+      return;
+    }
+
     if (files && files.length > 0) {
       const file = files[0];
       const validation = validateImageUpload(file);
@@ -54,18 +77,40 @@ export default function BannerManagement() {
         setTextError(validation.errorMessage);
         return;
       }
-      const filesUploaded = await uploadImages(file, adminToken);
-      if (!filesUploaded) {
+      const response = await uploadImages(file, adminToken, handleAdminLogout);
+
+      if (response.error) {
         setTextError("Tải ảnh lên không thành công");
         return;
       }
-      setImage(filesUploaded[0]);
+
+      if (modalType === "edit" && newEditImage) {
+        setNewEditImage(response.files[0]);
+      } else {
+        setImage(response.files[0]);
+      }
+
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
   const handleClearImagePreview = async () => {
-    const response = await deleteImage(image, adminToken, "banner");
+    let response = true;
+    if (modalType === "edit" && newEditImage) {
+      response = await deleteImage(
+        newEditImage,
+        adminToken,
+        "banner",
+        handleAdminLogout
+      );
+    } else {
+      response = await deleteImage(
+        image,
+        adminToken,
+        "banner",
+        handleAdminLogout
+      );
+    }
     if (response) {
       setImage("");
       setImagePreview("");
@@ -76,15 +121,27 @@ export default function BannerManagement() {
   };
 
   const handleSubmit = async () => {
-    const validation = validateBannerForm(title, subTitle, image);
+    const validation = validateBannerForm(
+      title,
+      subTitle,
+      newEditImage || image
+    );
     if (validation.isValid) {
       let response = null;
       setTextError("");
       if (validation.data) {
         if (modalType === "add") {
-          response = await createBanner(validation.data, adminToken);
+          response = await createBanner(
+            validation.data,
+            adminToken,
+            handleAdminLogout
+          );
         } else if (modalType === "edit") {
-          response = await updateBanner({ ...validation.data, id }, adminToken);
+          response = await updateBanner(
+            { ...validation.data, id },
+            adminToken,
+            handleAdminLogout
+          );
         }
       }
       if (response) {
@@ -104,8 +161,24 @@ export default function BannerManagement() {
     }
   };
 
-  const handleDelete = async () => {
-    const response = await deleteBanner(id, adminToken);
+  const handleRestore = async (bannerId: number) => {
+    const response = await restoreBanner(
+      bannerId,
+      adminToken,
+      handleAdminLogout
+    );
+    if (response) {
+      fetchBannersData();
+    }
+  };
+
+  const handleDelete = async (model: string) => {
+    const response = await deleteBanner(
+      id,
+      adminToken,
+      model,
+      handleAdminLogout
+    );
     if (response) {
       setOpenModal(false);
       fetchBannersData();
@@ -113,22 +186,33 @@ export default function BannerManagement() {
   };
 
   const handleCancel = () => {
-    if (image) {
+    if (modalType === "add") {
+      if (image) {
+        handleClearImagePreview();
+      }
+    } else if (modalType === "edit" && newEditImage) {
       handleClearImagePreview();
     }
     setOpenModal(false);
   };
 
   const fetchBannersData = async (mode: string = "active") => {
-    setLoading(true);
-    const data = await getBanners(mode);
-    setBanners(data.data);
-    setLoading(false);
+    const response = await getBanners(
+      { page, pageSize, mode },
+      handleAdminLogout
+    );
+    const normalizedData = normalizeObject(
+      response.data
+    ) as unknown as Banner[];
+    setBanners(normalizedData);
+    setTotalPages(
+      response.total_pages ? parseInt(response.total_pages.toString()) : 0
+    );
   };
 
   useEffect(() => {
     fetchBannersData();
-  }, []);
+  }, [page]);
 
   if (!banners) return <NotFoundPage />;
 
@@ -144,8 +228,9 @@ export default function BannerManagement() {
     setOpenModal(true);
   };
 
-  const handleSetDeleteState = (bannerId: number, modalType: string) => {
-    setId(bannerId);
+  const handleSetDeleteState = (banner: Banner, modalType: string) => {
+    setId(banner.id || 0);
+    setTitle(banner.title);
     setModalType(modalType);
     setOpenModal(true);
   };
@@ -209,9 +294,7 @@ export default function BannerManagement() {
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() =>
-                        handleSetDeleteState(banner.id || 0, "delete")
-                      }
+                      onClick={() => handleSetDeleteState(banner, "delete")}
                     >
                       Xóa tạm thời
                     </Button>
@@ -220,14 +303,14 @@ export default function BannerManagement() {
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => openEditModal(banner)}
+                      onClick={() => handleRestore(banner.id || 0)}
                     >
                       Khôi phục
                     </Button>
                     <Button
                       variant="destructive"
                       onClick={() =>
-                        handleSetDeleteState(banner.id || 0, "delete-force")
+                        handleSetDeleteState(banner, "delete-force")
                       }
                     >
                       Xóa viễn viễn
@@ -239,6 +322,8 @@ export default function BannerManagement() {
           ))}
         </tbody>
       </table>
+
+      <PaginationBar page={page} totalPages={totalPages} setPage={setPage} />
 
       {/* Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)}>
@@ -339,8 +424,11 @@ export default function BannerManagement() {
                 )}
               </form>
             )}
-            {modalType === "delete" && (
-              <p>Bạn có chắc chắn muốn xóa banner {title} không?</p>
+            {(modalType === "delete" || modalType === "delete-force") && (
+              <p>
+                Bạn có chắc chắn muốn xóa banner {title}{" "}
+                {modalType === "delete-force" && "viễn viễn"} không?
+              </p>
             )}
             <div className="mt-4 flex justify-end space-x-2">
               {(modalType === "add" || modalType === "edit") && (
@@ -348,8 +436,11 @@ export default function BannerManagement() {
                   {modalType === "add" ? "Thêm banner" : "Cập nhật banner"}
                 </Button>
               )}
-              {modalType === "delete" && (
-                <Button variant="destructive" onClick={handleDelete}>
+              {(modalType === "delete" || modalType === "delete-force") && (
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(modalType)}
+                >
                   Xác nhận
                 </Button>
               )}

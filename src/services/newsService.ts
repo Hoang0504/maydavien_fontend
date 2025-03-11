@@ -1,12 +1,5 @@
-// import { News } from "@/models/News";
 import { handleGetDataApi } from "@/utils";
-// import { ApiResponse } from "@/models/ApiResponse";
-
-interface CategoryQuery {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-}
+import ApiGetQuery from "@/models/ApiGetQuery";
 
 const API_GET_5_LATEST_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news?latest="true"`;
 const API_GET_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news`;
@@ -15,8 +8,12 @@ const API_GET_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news`;
 export const getLatestNews = async () =>
   handleGetDataApi(API_GET_5_LATEST_NEWS);
 
-export const getNews = async (query: CategoryQuery) => {
+export const getNews = async (query: ApiGetQuery) => {
   const url = new URL(API_GET_NEWS);
+
+  if (query.mode === "inactive") {
+    url.searchParams.append("mode", query.mode);
+  }
 
   if (query.page) url.searchParams.append("page", query.page.toString());
   if (query.pageSize)

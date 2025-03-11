@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { getUserLogin } from "@/services/userService";
-import { useAuthentication } from "@/context/AuthenticationContext";
+import { useAuthentication } from "@/context/authenticationContext";
 import routes from "@/config";
 import validateLoginForm from "@/validates/admin/validateLoginForm";
 
@@ -23,7 +23,6 @@ function Login() {
       const response = await getUserLogin(username, password);
       if (response) {
         handleAdminLogin(response);
-        router.push(routes.admin.banner);
         return;
       }
       setTextError("Tên người dùng hoặc mật khẩu không đúng");
@@ -36,7 +35,7 @@ function Login() {
     if (adminToken) {
       router.push(routes.admin.banner);
     }
-  }, []);
+  }, [adminToken]);
 
   return !adminToken ? (
     <section className="bg-gray-50 dark:bg-gray-900">

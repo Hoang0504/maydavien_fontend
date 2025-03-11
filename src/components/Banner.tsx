@@ -19,7 +19,7 @@ function Banner() {
 
   const fetchBannersData = async () => {
     setLoading(true);
-    const data = await getBanners();
+    const data = await getBanners({ mode: "all-active" });
     setBanners(data.data);
     setLoading(false);
   };

@@ -1,8 +1,21 @@
 import axios, { AxiosRequestConfig } from "axios";
 
+export const normalizeObject = (
+  arr: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> =>
+  arr.map((obj) =>
+    Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        typeof value === "string" ? decodeURIComponent(value) : value,
+      ])
+    )
+  );
+
 export const handleGetDataApi = async (
   url: string,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET", // Default to GET
+  handleAdminLogout?: () => void,
+  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE" = "GET", // Default to GET
   data?: FormData | object, // Accept FormData for images or other data types
   headers: AxiosRequestConfig["headers"] = {}
 ) => {
@@ -21,18 +34,25 @@ export const handleGetDataApi = async (
     const response = await axios(config);
 
     if (response.status < 200 || response.status >= 300) {
-      console.error("API Error:", response.status);
+      console.error("API Error 1:", response.status);
       return response;
     }
 
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.error("API Error:", error.response?.data || error.message);
-      return error.response?.data || error.message;
-    } else if (error instanceof Error) {
-      console.error("API Error:", error.message);
+      const errorData = error.response?.data || error.message;
 
+      if (errorData.message === "The token is not valid or has expired") {
+        if (handleAdminLogout) {
+          handleAdminLogout();
+        }
+      }
+
+      console.error("API Error 2:", errorData);
+      return errorData;
+    } else if (error instanceof Error) {
+      console.error("API Error 3:", error.message);
       return error.message;
     }
     return {

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import { ChevronDownIcon, GridIcon, HorizontaLDots, PlugInIcon } from "@/icons";
-import { useSidebar } from "@/context/SidebarContext";
+import { useSidebar } from "@/context/sidebarContext";
 
 type NavItem = {
   name: string;

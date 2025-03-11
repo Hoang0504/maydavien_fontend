@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { News } from "@/models/News";
+import { normalizeObject } from "@/utils";
 import { getNews } from "@/services/newsService";
 import { useLoading } from "@/context/loadingContext";
 import NotFoundPage from "@/components/NotFoundPage";
@@ -18,12 +19,15 @@ export default function NewsPage() {
 
   const fetchNewsData = async () => {
     setLoading(true);
-    const data = await getNews({
+    const response = await getNews({
       page,
       pageSize,
     });
-    setNews(data.data);
-    setTotalPages(data.total_pages ? parseInt(data.total_pages.toString()) : 0);
+    const normalizedData = normalizeObject(response.data) as unknown as News[];
+    setNews(normalizedData);
+    setTotalPages(
+      response.total_pages ? parseInt(response.total_pages.toString()) : 0
+    );
     setLoading(false);
   };
 

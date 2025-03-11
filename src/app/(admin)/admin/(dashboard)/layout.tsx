@@ -3,8 +3,8 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useSidebar } from "@/context/SidebarContext";
-import { useAuthentication } from "@/context/AuthenticationContext";
+import { useSidebar } from "@/context/sidebarContext";
+import { useAuthentication } from "@/context/authenticationContext";
 import routes from "@/config";
 import AppHeader from "@/components/layouts/admin/AppHeader";
 import AppSidebar from "@/components/layouts/admin/AppSidebar";

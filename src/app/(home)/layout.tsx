@@ -10,7 +10,7 @@ import Header from "@/components/layouts/Header";
 import Footer from "@/components/layouts/Footer";
 import Loading from "@/components/Loading";
 
-import { LoadingProvider } from "@/context/loadingContext";
+import LoadingProvider from "@/context/loadingContext";
 
 import styles from "../body.module.scss";
 
