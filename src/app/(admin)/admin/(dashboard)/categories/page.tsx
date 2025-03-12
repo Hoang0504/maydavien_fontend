@@ -4,18 +4,18 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import {
-  createBanner,
-  deleteBanner,
-  getBanners,
-  restoreBanner,
-  updateBanner,
-} from "@/services/bannerService";
+  createCategory,
+  deleteCategory,
+  getCategories,
+  restoreCategory,
+  updateCategory,
+} from "@/services/categoryService";
 
 import { getFilenameAndExtension, normalizeObject } from "@/utils";
 import { deleteImage, uploadImages } from "@/services/imageService";
-import { Banner, Banner as BannerModel } from "@/models/Banner";
+import { Category } from "@/models/Category";
 import { useAuthentication } from "@/context/authenticationContext";
-import { validateBannerForm, validateImageUpload } from "@/validates/admin";
+import { validateCategoryForm, validateImageUpload } from "@/validates/admin";
 
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
@@ -24,15 +24,15 @@ import DialogTitle from "@/components/ui/DialogTitle";
 import PaginationBar from "@/components/PaginationBar";
 import DialogContent from "@/components/ui/DialogContent";
 
-export default function BannerManagement() {
+export default function CategoryManagement() {
   const { adminToken, handleAdminLogout } = useAuthentication();
-  const [banners, setBanners] = useState<BannerModel[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [modeData, setModeData] = useState("active");
   const [id, setId] = useState(0);
-  const [title, setTitle] = useState("");
-  const [subTitle, setSubTitle] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState<string>("");
   const [newEditImage, setNewEditImage] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -41,11 +41,11 @@ export default function BannerManagement() {
   const pageSize = 2;
   const [totalPages, setTotalPages] = useState<number>(0);
 
-  const handleClickAddBannerButton = () => {
+  const handleClickAddCategoryButton = () => {
     setModalType("add");
     setOpenModal(true);
-    setTitle("");
-    setSubTitle("");
+    setName("");
+    setDescription("");
     setImage("");
     setImagePreview("");
     setTextError("");
@@ -59,12 +59,10 @@ export default function BannerManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "banner",
+        "category",
         handleAdminLogout
       );
       if (response) {
-        // setImage("");
-        // setImagePreview("");
         setTextError("");
         return;
       }
@@ -102,14 +100,14 @@ export default function BannerManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "banner",
+        "category",
         handleAdminLogout
       );
     } else {
       response = await deleteImage(
         image,
         adminToken,
-        "banner",
+        "category",
         handleAdminLogout
       );
     }
@@ -124,23 +122,23 @@ export default function BannerManagement() {
   };
 
   const handleSubmit = async () => {
-    const validation = validateBannerForm(
-      title,
-      subTitle,
-      newEditImage || image
+    const validation = validateCategoryForm(
+      name,
+      newEditImage || image,
+      description
     );
     if (validation.isValid) {
       let response = null;
       setTextError("");
       if (validation.data) {
         if (modalType === "add") {
-          response = await createBanner(
+          response = await createCategory(
             validation.data,
             adminToken,
             handleAdminLogout
           );
         } else if (modalType === "edit") {
-          response = await updateBanner(
+          response = await updateCategory(
             { ...validation.data, id },
             adminToken,
             handleAdminLogout
@@ -149,8 +147,8 @@ export default function BannerManagement() {
       }
       if (response) {
         if (response.error) {
-          if (response.message === "Banner title already exists.") {
-            setTextError("Tên banner đã tồn tại!");
+          if (response.message === "Category name already exists.") {
+            setTextError("Tên danh mục đã tồn tại!");
           }
         } else {
           setOpenModal(false);
@@ -165,9 +163,9 @@ export default function BannerManagement() {
     }
   };
 
-  const handleRestore = async (bannerId: number) => {
-    const response = await restoreBanner(
-      bannerId,
+  const handleRestore = async (categoryId: number) => {
+    const response = await restoreCategory(
+      categoryId,
       adminToken,
       handleAdminLogout
     );
@@ -178,7 +176,7 @@ export default function BannerManagement() {
   };
 
   const handleDelete = async (model: string) => {
-    const response = await deleteBanner(
+    const response = await deleteCategory(
       id,
       adminToken,
       model,
@@ -202,50 +200,50 @@ export default function BannerManagement() {
     setOpenModal(false);
   };
 
-  const fetchBannersData = async (mode: string = "active") => {
-    const response = await getBanners(
+  const fetchCategoriesData = async (mode: string = "active") => {
+    const response = await getCategories(
       { page, pageSize, mode },
       handleAdminLogout
     );
     const normalizedData = normalizeObject(
       response.data
-    ) as unknown as Banner[];
-    setBanners(normalizedData);
+    ) as unknown as Category[];
+    setCategories(normalizedData);
     setTotalPages(
       response.total_pages ? parseInt(response.total_pages.toString()) : 0
     );
   };
 
   useEffect(() => {
-    fetchBannersData(modeData);
+    fetchCategoriesData(modeData);
   }, [page, modeData]);
 
-  if (!banners) return <NotFoundPage />;
+  if (!categories) return <NotFoundPage />;
 
-  const openEditModal = (banner: BannerModel) => {
-    setId(banner.id || 0);
-    setTitle(banner.title);
-    setSubTitle(banner.sub_title || "");
-    setImage(getFilenameAndExtension(banner.image));
+  const openEditModal = (category: Category) => {
+    setId(category.id || 0);
+    setName(category.name);
+    setDescription(category.description || "");
+    setImage(getFilenameAndExtension(category.image));
     setNewEditImage("");
 
-    setImagePreview(banner.image);
+    setImagePreview(category.image);
     setTextError("");
     setModalType("edit");
     setOpenModal(true);
   };
 
-  const handleSetDeleteState = (banner: Banner, modalType: string) => {
-    setId(banner.id || 0);
-    setTitle(banner.title);
+  const handleSetDeleteState = (category: Category, modalType: string) => {
+    setId(category.id || 0);
+    setName(category.name);
     setModalType(modalType);
     setOpenModal(true);
   };
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-4">Quản lý banner</h1>
-      <Button className="mb-4" onClick={handleClickAddBannerButton}>
+      <h1 className="text-2xl font-bold mb-4">Quản lý danh mục</h1>
+      <Button className="mb-4" onClick={handleClickAddCategoryButton}>
         + Thêm mới
       </Button>
       <Button
@@ -256,7 +254,7 @@ export default function BannerManagement() {
           setModeData("active");
         }}
       >
-        Banner có sẵn
+        Danh mục có sẵn
       </Button>
       <Button
         className="mb-4 ml-4"
@@ -266,48 +264,46 @@ export default function BannerManagement() {
           setModeData("inactive");
         }}
       >
-        Banner đã xóa tạm thời
+        Danh mục đã xóa tạm thời
       </Button>
       <table className="w-full text-left table-auto min-w-max">
         <thead>
           <tr>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Mã banner
+              Mã danh mục
             </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
               Tiêu đề
             </th>
-            <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Tiêu đề phụ
-            </th>
+            <th className="p-4 border-b border-slate-300 bg-slate-50">Mô tả</th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
               Hành động
             </th>
           </tr>
         </thead>
         <tbody>
-          {banners.map((banner) => (
+          {categories.map((category) => (
             <tr
-              key={banner.id}
+              key={category.id}
               className={"hover:bg-slate-50 bg-white text-gray-400"}
             >
-              <td className="p-4 border-b border-slate-200">{banner.id}</td>
-              <td className="p-4 border-b border-slate-200">{banner.title}</td>
+              <td className="p-4 border-b border-slate-200">{category.id}</td>
+              <td className="p-4 border-b border-slate-200">{category.name}</td>
               <td className="p-4 border-b border-slate-200">
-                {banner.sub_title}
+                {category.description}
               </td>
               <td className="p-4 border-b border-slate-200">
-                {banner.status ? (
+                {category.status ? (
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => openEditModal(banner)}
+                      onClick={() => openEditModal(category)}
                     >
                       Chỉnh sửa
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => handleSetDeleteState(banner, "delete")}
+                      onClick={() => handleSetDeleteState(category, "delete")}
                     >
                       Xóa tạm thời
                     </Button>
@@ -316,14 +312,14 @@ export default function BannerManagement() {
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => handleRestore(banner.id || 0)}
+                      onClick={() => handleRestore(category.id || 0)}
                     >
                       Khôi phục
                     </Button>
                     <Button
                       variant="destructive"
                       onClick={() =>
-                        handleSetDeleteState(banner, "delete-force")
+                        handleSetDeleteState(category, "delete-force")
                       }
                     >
                       Xóa viễn viễn
@@ -342,8 +338,8 @@ export default function BannerManagement() {
       <Dialog open={openModal} onClose={() => setOpenModal(false)}>
         <DialogContent>
           <DialogTitle>
-            {modalType === "add" && "Thêm banner"}
-            {modalType === "edit" && "Chỉnh sửa banner"}
+            {modalType === "add" && "Thêm danh mục"}
+            {modalType === "edit" && "Chỉnh sửa danh mục"}
             {modalType === "delete" && "Xác nhận xóa"}
           </DialogTitle>
           <div className="p-4">
@@ -352,16 +348,16 @@ export default function BannerManagement() {
                 {textError && <div className="text-red-500">{textError}</div>}
                 <div className="mb-4">
                   <label
-                    htmlFor="title"
+                    htmlFor="name"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Tiêu đề
                   </label>
                   <input
-                    id="title"
+                    id="name"
                     type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập tiêu đề"
                   />
@@ -369,18 +365,18 @@ export default function BannerManagement() {
 
                 <div className="mb-4">
                   <label
-                    htmlFor="subTitle"
+                    htmlFor="description"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Mô tả phụ
+                    Mô tả
                   </label>
                   <input
-                    id="subTitle"
+                    id="description"
                     type="text"
-                    value={subTitle}
-                    onChange={(e) => setSubTitle(e.target.value)}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mô tả phụ"
+                    placeholder="Nhập mô tả"
                   />
                 </div>
 
@@ -439,14 +435,14 @@ export default function BannerManagement() {
             )}
             {(modalType === "delete" || modalType === "delete-force") && (
               <p>
-                Bạn có chắc chắn muốn xóa banner {title}{" "}
+                Bạn có chắc chắn muốn xóa danh mục {name}{" "}
                 {modalType === "delete-force" && "viễn viễn"} không?
               </p>
             )}
             <div className="mt-4 flex justify-end space-x-2">
               {(modalType === "add" || modalType === "edit") && (
                 <Button variant="green" onClick={handleSubmit}>
-                  {modalType === "add" ? "Thêm banner" : "Cập nhật banner"}
+                  {modalType === "add" ? "Thêm danh mục" : "Cập nhật danh mục"}
                 </Button>
               )}
               {(modalType === "delete" || modalType === "delete-force") && (

@@ -16,7 +16,7 @@ import IntroduceSection from "@/components/IntroduceSection";
 import ProductSection from "@/components/ProductSection";
 import TestimonialSection from "@/components/TestimonialSection";
 
-import styles from "../body.module.scss";
+import styles from "./body.module.scss";
 
 const cx = classNames.bind(styles);
 

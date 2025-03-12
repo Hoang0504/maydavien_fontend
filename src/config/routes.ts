@@ -8,7 +8,9 @@ const routes = {
   news: "/news",
   admin: {
     login: "/admin/login",
-    banner: "/admin",
+    logout: "/admin/logout",
+    banners: "/admin",
+    categories: "/admin/categories",
   },
 };
 

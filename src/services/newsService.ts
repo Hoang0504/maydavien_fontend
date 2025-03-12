@@ -1,11 +1,13 @@
+import { News } from "@/models/News";
+import { ApiResponse } from "@/interfaces";
 import { handleGetDataApi } from "@/utils";
-import ApiGetQuery from "@/models/ApiGetQuery";
+import ApiGetQuery from "@/interfaces/ApiGetQuery";
 
 const API_GET_5_LATEST_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news?latest="true"`;
 const API_GET_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news`;
 
-// : Promise<ApiResponse<News[]>>
-export const getLatestNews = async () =>
+//
+export const getLatestNews = async (): Promise<ApiResponse<News[]>> =>
   handleGetDataApi(API_GET_5_LATEST_NEWS);
 
 export const getNews = async (query: ApiGetQuery) => {

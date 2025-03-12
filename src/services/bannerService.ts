@@ -1,6 +1,6 @@
 import { Banner } from "@/models/Banner";
 import { handleGetDataApi } from "@/utils";
-import ApiGetQuery from "@/models/ApiGetQuery";
+import ApiGetQuery from "@/interfaces/ApiGetQuery";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/banners`;
 

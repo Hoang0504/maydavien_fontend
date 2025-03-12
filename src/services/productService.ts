@@ -1,6 +1,6 @@
 import { Product } from "@/models/Product";
 import { handleGetDataApi } from "@/utils";
-import { ApiResponse } from "@/models/ApiResponse";
+import { ApiResponse } from "@/interfaces";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/products`;
 

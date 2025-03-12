@@ -17,7 +17,7 @@ function PaginationBar({ page, totalPages, setPage }: PaginationBarProps) {
         className="px-4 py-2 bg-red-600 text-white rounded-lg"
         disabled={page === 1}
       >
-        Previous
+        Trang trước
       </button>
       {Array.from({ length: totalPages }, (_, index) => index + 1).map(
         (pageNumber) => (
@@ -39,7 +39,7 @@ function PaginationBar({ page, totalPages, setPage }: PaginationBarProps) {
         className="px-4 py-2 bg-red-600 text-white rounded-lg"
         disabled={page === totalPages}
       >
-        Next
+        Trang sau
       </button>
     </div>
   );

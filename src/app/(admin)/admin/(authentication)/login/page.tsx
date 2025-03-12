@@ -33,7 +33,7 @@ function Login() {
 
   useEffect(() => {
     if (adminToken) {
-      router.push(routes.admin.banner);
+      router.push(routes.admin.banners);
     }
   }, [adminToken]);
 

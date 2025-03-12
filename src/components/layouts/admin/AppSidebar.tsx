@@ -1,11 +1,19 @@
 "use client";
+
+import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 
-import { ChevronDownIcon, GridIcon, HorizontaLDots, PlugInIcon } from "@/icons";
+import {
+  faChevronDown,
+  faEllipsis,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { ManagementIcon } from "@/components/icon";
 import { useSidebar } from "@/context/sidebarContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import routes from "@/config";
 
 type NavItem = {
   name: string;
@@ -16,20 +24,20 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    icon: <GridIcon />,
+    icon: <ManagementIcon />,
     name: "Quản lý",
-    subItems: [{ name: "Banner", path: "/admin", pro: false }],
+    subItems: [
+      { name: "Banner", path: routes.admin.banners, pro: false },
+      { name: "Danh mục", path: routes.admin.categories, pro: false },
+    ],
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PlugInIcon />,
-    name: "Cấp quyền",
-    subItems: [
-      { name: "Đăng nhập", path: "/admin/signin", pro: false },
-      { name: "Đăng ký", path: "/admin/signup", pro: false },
-    ],
+    icon: <FontAwesomeIcon icon={faUser} />,
+    name: "Tài khoản",
+    subItems: [{ name: "Đăng xuất", path: routes.admin.logout, pro: false }],
   },
 ];
 
@@ -70,8 +78,9 @@ const AppSidebar: React.FC = () => {
                 <span className={`menu-item-text`}>{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200  ${
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`ml-auto w-5 h-5 transition-transform duration-200 w-[15px] h-[15px]  ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
                       ? "rotate-180 text-brand-500"
@@ -284,7 +293,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Danh mục"
                 ) : (
-                  <HorizontaLDots />
+                  <FontAwesomeIcon icon={faEllipsis} />
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
@@ -301,7 +310,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Khác"
                 ) : (
-                  <HorizontaLDots />
+                  <FontAwesomeIcon icon={faEllipsis} />
                 )}
               </h2>
               {renderMenuItems(othersItems, "others")}

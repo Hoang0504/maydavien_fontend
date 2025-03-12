@@ -56,6 +56,7 @@ function TestimonialSection() {
                     objectFit="cover"
                     className="w-12 h-12 border-4 border-blue-500 rounded-full mr-2"
                     loading="lazy"
+                    unoptimized
                   />
                   <div>
                     <h3 className="font-bold leading-none">{evaluate.name}</h3>

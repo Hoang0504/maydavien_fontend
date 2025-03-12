@@ -1,6 +1,6 @@
 import { handleGetDataApi } from "@/utils";
 import { Evaluate } from "@/models/Evaluate";
-import { ApiResponse } from "@/models/ApiResponse";
+import { ApiResponse } from "@/interfaces";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/evaluates`;
 

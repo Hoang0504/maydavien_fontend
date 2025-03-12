@@ -25,6 +25,7 @@ const AuthenticationContext = createContext({
 
 const AuthenticationProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
+  const [startRender, setStartRender] = useState<boolean>(false);
   const [adminToken, setAdminToken] = useState("");
   const [adminAccount, setAdminAccount] = useState<UserResponse | null>(null);
 
@@ -33,7 +34,7 @@ const AuthenticationProvider = ({ children }: { children: ReactNode }) => {
     setAdminAccount(data.user);
     localStorage.setItem("adminToken", JSON.stringify(data.token));
     localStorage.setItem("adminAccount", JSON.stringify(data.user));
-    router.push(routes.admin.banner);
+    router.push(routes.admin.banners);
   };
 
   const handleAdminLogout = () => {
@@ -65,9 +66,11 @@ const AuthenticationProvider = ({ children }: { children: ReactNode }) => {
       setAdminToken(tokenFromLocalStorage);
       setAdminAccount(adminAccountFromLocalStorage);
     }
+
+    setStartRender(true);
   }, []);
 
-  return adminToken ? (
+  return startRender ? (
     <AuthenticationContext.Provider
       value={{
         adminToken,

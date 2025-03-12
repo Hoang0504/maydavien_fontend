@@ -12,7 +12,7 @@ import Loading from "@/components/Loading";
 
 import LoadingProvider from "@/context/loadingContext";
 
-import styles from "../body.module.scss";
+import styles from "./body.module.scss";
 
 const cx = classNames.bind(styles);
 
