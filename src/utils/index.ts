@@ -1,17 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-// export const normalizeObject = (
-//   arr: Array<Record<string, unknown>>
-// ): Array<Record<string, unknown>> =>
-//   arr.map((obj) =>
-//     Object.fromEntries(
-//       Object.entries(obj).map(([key, value]) => [
-//         key,
-//         typeof value === "string" ? decodeURIComponent(value) : value,
-//       ])
-//     )
-//   );
-
 export const normalizeObject = <T extends Record<string, unknown>>(
   arr: T[]
 ): T[] =>
