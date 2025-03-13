@@ -1,17 +1,47 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-export const normalizeObject = (
-  arr: Array<Record<string, unknown>>
-): Array<Record<string, unknown>> =>
-  arr.map((obj) =>
-    Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
-        key,
-        typeof value === "string" ? decodeURIComponent(value) : value,
-      ])
-    )
-  );
+// export const normalizeObject = (
+//   arr: Array<Record<string, unknown>>
+// ): Array<Record<string, unknown>> =>
+//   arr.map((obj) =>
+//     Object.fromEntries(
+//       Object.entries(obj).map(([key, value]) => [
+//         key,
+//         typeof value === "string" ? decodeURIComponent(value) : value,
+//       ])
+//     )
+//   );
 
+export const normalizeObject = <T extends Record<string, unknown>>(
+  arr: T[]
+): T[] =>
+  arr.map(
+    (obj) =>
+      Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => {
+          if (typeof value === "string") {
+            try {
+              return [key, decodeURIComponent(value)];
+            } catch {
+              return [key, value];
+            }
+          } else if (Array.isArray(value)) {
+            return [
+              key,
+              value.map((item) =>
+                typeof item === "string" ? decodeURIComponent(item) : item
+              ),
+            ];
+          } else if (typeof value === "object" && value !== null) {
+            return [
+              key,
+              normalizeObject(value as Record<string, unknown>[])[0],
+            ];
+          }
+          return [key, value];
+        })
+      ) as T
+  );
 export const handleGetDataApi = async (
   url: string,
   handleAdminLogout?: () => void,
@@ -67,5 +97,7 @@ export const getFilenameAndExtension = (url: string) => {
   if (!filename) return "";
   return filename;
 };
+
+export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const encodeString = (str: string) => encodeURIComponent(str.trim());

@@ -12,15 +12,15 @@ const validateCategoryForm = (
     };
   }
 
-  if (!image) {
-    return { isValid: false, errorMessage: "Ảnh không được để trống." };
-  }
-
   if (description.trim().length < 20) {
     return {
       isValid: false,
-      errorMessage: "Phụ đề phải có ít nhất 20 ký tự.",
+      errorMessage: "Mô tả phải có ít nhất 20 ký tự.",
     };
+  }
+
+  if (!image) {
+    return { isValid: false, errorMessage: "Ảnh không được để trống." };
   }
 
   return {

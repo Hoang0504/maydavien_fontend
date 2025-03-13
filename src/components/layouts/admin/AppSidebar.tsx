@@ -29,6 +29,8 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Banner", path: routes.admin.banners, pro: false },
       { name: "Danh mục", path: routes.admin.categories, pro: false },
+      { name: "Giới thiệu", path: routes.admin.introduces, pro: false },
+      { name: "Đánh giá", path: routes.admin.evaluates, pro: false },
     ],
   },
 ];

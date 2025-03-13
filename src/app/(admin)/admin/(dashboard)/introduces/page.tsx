@@ -5,18 +5,18 @@ import { Editor } from "@tinymce/tinymce-react";
 import Image from "next/image";
 
 import {
-  createCategory,
-  deleteCategory,
-  getCategories,
-  restoreCategory,
-  updateCategory,
-} from "@/services/categoryService";
+  createIntroduce,
+  deleteIntroduce,
+  getIntroduces,
+  restoreIntroduce,
+  updateIntroduce,
+} from "@/services/introduceService";
 
 import { getFilenameAndExtension, normalizeObject } from "@/utils";
 import { deleteImage, uploadImages } from "@/services/imageService";
-import { Category } from "@/models/Category";
+import { Introduce } from "@/models/Introduce";
 import { useAuthentication } from "@/context/authenticationContext";
-import { validateCategoryForm, validateImageUpload } from "@/validates/admin";
+import { validateIntroduceForm, validateImageUpload } from "@/validates/admin";
 
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
@@ -25,29 +25,35 @@ import DialogTitle from "@/components/ui/DialogTitle";
 import PaginationBar from "@/components/PaginationBar";
 import DialogContent from "@/components/ui/DialogContent";
 
-export default function CategoryManagement() {
+export default function IntroduceManagement() {
   const { adminToken, handleAdminLogout } = useAuthentication();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [introduces, setIntroduces] = useState<Introduce[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [modeData, setModeData] = useState("active");
   const [id, setId] = useState(0);
-  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [subTitle, setSubTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string>("");
+  const [linkTitle, setLinkTitle] = useState("");
+  const [type, setType] = useState<number>(1);
   const [newEditImage, setNewEditImage] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [textError, setTextError] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 2;
+  const pageSize = 5;
   const [totalPages, setTotalPages] = useState<number>(0);
 
-  const handleClickAddCategoryButton = () => {
+  const handleClickAddIntroduceButton = () => {
     setModalType("add");
     setOpenModal(true);
-    setName("");
+    setTitle("");
+    setSubTitle("");
     setDescription("");
     setImage("");
+    setLinkTitle("");
+    setType(1);
     setImagePreview("");
     setTextError("");
   };
@@ -60,7 +66,7 @@ export default function CategoryManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "category",
+        "introduce",
         handleAdminLogout
       );
       if (response) {
@@ -101,14 +107,14 @@ export default function CategoryManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "category",
+        "introduce",
         handleAdminLogout
       );
     } else if (modalType === "add" && image) {
       response = await deleteImage(
         image,
         adminToken,
-        "category",
+        "introduce",
         handleAdminLogout
       );
     }
@@ -125,23 +131,26 @@ export default function CategoryManagement() {
   };
 
   const handleSubmit = async () => {
-    const validation = validateCategoryForm(
-      name,
+    const validation = validateIntroduceForm(
+      title,
+      subTitle,
+      description,
       newEditImage || image,
-      description
+      linkTitle,
+      type
     );
     if (validation.isValid) {
       let response = null;
       setTextError("");
       if (validation.data) {
         if (modalType === "add") {
-          response = await createCategory(
+          response = await createIntroduce(
             validation.data,
             adminToken,
             handleAdminLogout
           );
         } else if (modalType === "edit") {
-          response = await updateCategory(
+          response = await updateIntroduce(
             { ...validation.data, id },
             adminToken,
             handleAdminLogout
@@ -150,15 +159,15 @@ export default function CategoryManagement() {
       }
       if (response) {
         if (response.error) {
-          if (response.message === "Category name already exists.") {
-            setTextError("Tên danh mục đã tồn tại!");
+          if (response.message === "Introduce title already exists.") {
+            setTextError("Tên phần giới thiệu đã tồn tại!");
             return;
           }
           handleClearImagePreview();
         } else {
           setOpenModal(false);
           if (page === 1 && modeData === "active") {
-            fetchCategoriesData();
+            fetchIntroducesData();
           } else {
             setPage(1);
             setModeData("active");
@@ -172,9 +181,9 @@ export default function CategoryManagement() {
     }
   };
 
-  const handleRestore = async (categoryId: number) => {
-    const response = await restoreCategory(
-      categoryId,
+  const handleRestore = async (introduceId: number) => {
+    const response = await restoreIntroduce(
+      introduceId,
       adminToken,
       handleAdminLogout
     );
@@ -185,7 +194,7 @@ export default function CategoryManagement() {
   };
 
   const handleDelete = async (model: string) => {
-    const response = await deleteCategory(
+    const response = await deleteIntroduce(
       id,
       adminToken,
       model,
@@ -194,7 +203,7 @@ export default function CategoryManagement() {
     if (response) {
       setOpenModal(false);
       if (page === 1 && modeData === "active") {
-        fetchCategoriesData();
+        fetchIntroducesData();
       } else {
         setPage(1);
         setModeData("active");
@@ -213,50 +222,53 @@ export default function CategoryManagement() {
     setOpenModal(false);
   };
 
-  const fetchCategoriesData = async (mode: string = "active") => {
-    const response = await getCategories(
+  const fetchIntroducesData = async (mode: string = "active") => {
+    const response = await getIntroduces(
       { page, pageSize, mode },
       handleAdminLogout
     );
     const normalizedData = normalizeObject(
       response.data
-    ) as unknown as Category[];
-    setCategories(normalizedData);
+    ) as unknown as Introduce[];
+    setIntroduces(normalizedData);
     setTotalPages(
       response.total_pages ? parseInt(response.total_pages.toString()) : 0
     );
   };
 
   useEffect(() => {
-    fetchCategoriesData(modeData);
+    fetchIntroducesData(modeData);
   }, [page, modeData]);
 
-  if (!categories) return <NotFoundPage />;
+  if (!introduces) return <NotFoundPage />;
 
-  const openEditModal = (category: Category) => {
-    setId(category.id || 0);
-    setName(category.name);
-    setDescription(category.description || "");
-    setImage(getFilenameAndExtension(category.image));
+  const openEditModal = (introduce: Introduce) => {
+    setId(introduce.id || 0);
+    setTitle(introduce.title);
+    setSubTitle(introduce.sub_title || "");
+    setDescription(introduce.description || "");
+    setImage(getFilenameAndExtension(introduce.image));
+    setLinkTitle(introduce.link_title || "");
+    setType(introduce.type);
     setNewEditImage("");
 
-    setImagePreview(category.image);
+    setImagePreview(introduce.image);
     setTextError("");
     setModalType("edit");
     setOpenModal(true);
   };
 
-  const handleSetDeleteState = (category: Category, modalType: string) => {
-    setId(category.id || 0);
-    setName(category.name);
+  const handleSetDeleteState = (introduce: Introduce, modalType: string) => {
+    setId(introduce.id || 0);
+    setTitle(introduce.title);
     setModalType(modalType);
     setOpenModal(true);
   };
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-4">Quản lý danh mục</h1>
-      <Button className="mb-4" onClick={handleClickAddCategoryButton}>
+      <h1 className="text-2xl font-bold mb-4">Quản lý phần giới thiệu</h1>
+      <Button className="mb-4" onClick={handleClickAddIntroduceButton}>
         + Thêm mới
       </Button>
       <Button
@@ -267,7 +279,7 @@ export default function CategoryManagement() {
           setModeData("active");
         }}
       >
-        Danh mục có sẵn
+        Phần giới thiệu có sẵn
       </Button>
       <Button
         className="mb-4 ml-4"
@@ -277,50 +289,51 @@ export default function CategoryManagement() {
           setModeData("inactive");
         }}
       >
-        Danh mục đã xóa tạm thời
+        Phần giới thiệu đã xóa tạm thời
       </Button>
       <table className="w-full max-w-full text-left table-auto">
         <thead>
           <tr>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Mã danh mục
+              Mã phần giới thiệu
             </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
               Tiêu đề
             </th>
-            <th className="p-4 border-b border-slate-300 bg-slate-50">Mô tả</th>
+            <th className="p-4 border-b border-slate-300 bg-slate-50">
+              Tiêu đề phụ
+            </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
               Hành động
             </th>
           </tr>
         </thead>
         <tbody>
-          {categories.map((category) => (
+          {introduces.map((introduce) => (
             <tr
-              key={category.id}
+              key={introduce.id}
               className={"hover:bg-slate-50 bg-white text-gray-400"}
             >
-              <td className="p-4 border-b border-slate-200">{category.id}</td>
-              <td className="p-4 border-b border-slate-200">{category.name}</td>
+              <td className="p-4 border-b border-slate-200">{introduce.id}</td>
               <td className="p-4 border-b border-slate-200">
-                <div
-                  className="line-clamp-3"
-                  dangerouslySetInnerHTML={{ __html: category.description }}
-                />
+                {introduce.title}
               </td>
               <td className="p-4 border-b border-slate-200">
-                {category.status ? (
+                {introduce.sub_title}
+              </td>
+              <td className="p-4 border-b border-slate-200">
+                {introduce.status ? (
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => openEditModal(category)}
+                      onClick={() => openEditModal(introduce)}
                     >
                       Chỉnh sửa
                     </Button>
                     <Button
                       className="mr-2"
                       variant="destructive"
-                      onClick={() => handleSetDeleteState(category, "delete")}
+                      onClick={() => handleSetDeleteState(introduce, "delete")}
                     >
                       Xóa tạm thời
                     </Button>
@@ -329,7 +342,7 @@ export default function CategoryManagement() {
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => handleRestore(category.id || 0)}
+                      onClick={() => handleRestore(introduce.id || 0)}
                     >
                       Khôi phục
                     </Button>
@@ -337,7 +350,7 @@ export default function CategoryManagement() {
                       className="mr-2"
                       variant="destructive"
                       onClick={() =>
-                        handleSetDeleteState(category, "delete-force")
+                        handleSetDeleteState(introduce, "delete-force")
                       }
                     >
                       Xóa viễn viễn
@@ -356,8 +369,8 @@ export default function CategoryManagement() {
       <Dialog width={800} open={openModal} onClose={() => setOpenModal(false)}>
         <DialogContent>
           <DialogTitle>
-            {modalType === "add" && "Thêm danh mục"}
-            {modalType === "edit" && "Chỉnh sửa danh mục"}
+            {modalType === "add" && "Thêm phần giới thiệu"}
+            {modalType === "edit" && "Chỉnh sửa phần giới thiệu"}
             {modalType === "delete" && "Xác nhận xóa"}
           </DialogTitle>
           <div className="p-4">
@@ -366,18 +379,35 @@ export default function CategoryManagement() {
                 {textError && <div className="text-red-500">{textError}</div>}
                 <div className="mb-4">
                   <label
-                    htmlFor="name"
+                    htmlFor="title"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Tiêu đề
                   </label>
                   <input
-                    id="name"
+                    id="title"
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập tiêu đề"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="subTitle"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Tiêu đề phụ
+                  </label>
+                  <input
+                    id="subTitle"
+                    type="text"
+                    value={subTitle}
+                    onChange={(e) => setSubTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Nhập tiêu đề phụ"
                   />
                 </div>
 
@@ -470,18 +500,60 @@ export default function CategoryManagement() {
                     </div>
                   </div>
                 )}
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="linkTitle"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Tiêu đề liên kết
+                  </label>
+                  <input
+                    id="linkTitle"
+                    type="text"
+                    value={linkTitle}
+                    onChange={(e) => setLinkTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Nhập tiêu đề liên kết"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Phong cách
+                  </label>
+                  <input
+                    id="type"
+                    type="checkbox"
+                    value="1"
+                    checked={type === 1}
+                    onChange={(e) => setType(parseInt(e.target.value))}
+                  />
+                  <span className="mx-1">Phong cách 1</span>
+                  <input
+                    id="type"
+                    type="checkbox"
+                    value="2"
+                    checked={type === 2}
+                    onChange={(e) => setType(parseInt(e.target.value))}
+                    className="ml-1"
+                  />
+                  <span className="mx-1">Phong cách 2</span>
+                </div>
               </form>
             )}
             {(modalType === "delete" || modalType === "delete-force") && (
               <p>
-                Bạn có chắc chắn muốn xóa danh mục {name}{" "}
+                Bạn có chắc chắn muốn xóa phần giới thiệu {title}{" "}
                 {modalType === "delete-force" && "viễn viễn"} không?
               </p>
             )}
             <div className="mt-4 flex justify-end space-x-2">
               {(modalType === "add" || modalType === "edit") && (
                 <Button variant="green" onClick={handleSubmit}>
-                  {modalType === "add" ? "Thêm danh mục" : "Cập nhật danh mục"}
+                  {modalType === "add"
+                    ? "Thêm phần giới thiệu"
+                    : "Cập nhật phần giới thiệu"}
                 </Button>
               )}
               {(modalType === "delete" || modalType === "delete-force") && (

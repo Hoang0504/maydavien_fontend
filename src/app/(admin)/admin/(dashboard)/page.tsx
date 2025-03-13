@@ -105,7 +105,7 @@ export default function BannerManagement() {
         "banner",
         handleAdminLogout
       );
-    } else {
+    } else if (modalType === "add" && image) {
       response = await deleteImage(
         image,
         adminToken,
@@ -154,8 +154,12 @@ export default function BannerManagement() {
           }
         } else {
           setOpenModal(false);
-          setPage(1);
-          setModeData("active");
+          if (page === 1 && modeData === "active") {
+            fetchBannersData();
+          } else {
+            setPage(1);
+            setModeData("active");
+          }
         }
       } else {
         setTextError("Thao tác không thành công!");
@@ -186,8 +190,12 @@ export default function BannerManagement() {
     );
     if (response) {
       setOpenModal(false);
-      setPage(1);
-      setModeData("active");
+      if (page === 1 && modeData === "active") {
+        fetchBannersData();
+      } else {
+        setPage(1);
+        setModeData("active");
+      }
     }
   };
 

@@ -11,6 +11,8 @@ const routes = {
     logout: "/admin/logout",
     banners: "/admin",
     categories: "/admin/categories",
+    introduces: "/admin/introduces",
+    evaluates: "/admin/evaluates",
   },
 };
 

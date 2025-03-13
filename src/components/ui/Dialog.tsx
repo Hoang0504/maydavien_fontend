@@ -1,10 +1,16 @@
 type DialogProps = {
+  width?: number;
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
 };
 
-export default function Dialog({ open, onClose, children }: DialogProps) {
+export default function Dialog({
+  width = 384,
+  open,
+  onClose,
+  children,
+}: DialogProps) {
   if (!open) return null;
   return (
     <div
@@ -12,7 +18,8 @@ export default function Dialog({ open, onClose, children }: DialogProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg w-96"
+        style={{ maxWidth: `${width}px` }}
+        className="bg-white rounded-lg shadow-lg w-full max-h-screen overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
