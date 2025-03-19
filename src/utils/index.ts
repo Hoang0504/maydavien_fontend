@@ -1,35 +1,40 @@
 import axios, { AxiosRequestConfig } from "axios";
 
+import { ApiGetQuery } from "@/interfaces";
+
 export const normalizeObject = <T extends Record<string, unknown>>(
   arr: T[]
-): T[] =>
-  arr.map(
-    (obj) =>
-      Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => {
-          if (typeof value === "string") {
-            try {
-              return [key, decodeURIComponent(value)];
-            } catch {
-              return [key, value];
+): T[] => {
+  if (Array.isArray(arr) && arr.length > 0) {
+    return arr.map(
+      (obj) =>
+        Object.fromEntries(
+          Object.entries(obj).map(([key, value]) => {
+            if (typeof value === "string") {
+              try {
+                return [key, value];
+              } catch {
+                return [key, value];
+              }
+            } else if (Array.isArray(value)) {
+              return [
+                key,
+                value.map((item) => (typeof item === "string" ? item : item)),
+              ];
+            } else if (typeof value === "object" && value !== null) {
+              return [
+                key,
+                normalizeObject([value as Record<string, unknown>])[0],
+              ];
             }
-          } else if (Array.isArray(value)) {
-            return [
-              key,
-              value.map((item) =>
-                typeof item === "string" ? decodeURIComponent(item) : item
-              ),
-            ];
-          } else if (typeof value === "object" && value !== null) {
-            return [
-              key,
-              normalizeObject(value as Record<string, unknown>[])[0],
-            ];
-          }
-          return [key, value];
-        })
-      ) as T
-  );
+            return [key, value];
+          })
+        ) as T
+    );
+  } else {
+    return arr;
+  }
+};
 export const handleGetDataApi = async (
   url: string,
   handleAdminLogout?: () => void,
@@ -88,4 +93,28 @@ export const getFilenameAndExtension = (url: string) => {
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const encodeString = (str: string) => encodeURIComponent(str.trim());
+export const getMethodDataWithParameters = async (
+  query: ApiGetQuery,
+  urlGet: string,
+  handleAdminLogout?: () => void,
+  adminToken?: string
+) => {
+  const url = new URL(urlGet);
+  if (query?.page) url.searchParams.append("page", query.page);
+  if (query?.pageSize) url.searchParams.append("pageSize", query.pageSize);
+  if (query?.search) url.searchParams.append("search", query.search);
+  if (query?.categoryId)
+    url.searchParams.append("categoryId", query.categoryId);
+  if (query?.mode) url.searchParams.append("mode", query.mode);
+  return handleGetDataApi(
+    url.toString(),
+    handleAdminLogout,
+    "GET",
+    undefined,
+    adminToken
+      ? {
+          Authorization: `Bearer ${adminToken}`,
+        }
+      : undefined
+  );
+};

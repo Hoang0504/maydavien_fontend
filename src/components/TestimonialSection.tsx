@@ -19,7 +19,7 @@ function TestimonialSection() {
 
   const fetchEvaluatesData = async () => {
     setLoading(true);
-    const data = await getEvaluates();
+    const data = await getEvaluates({ mode: "all-active" });
     setEvaluates(data.data);
     setLoading(false);
   };

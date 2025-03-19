@@ -1,10 +1,10 @@
 export interface News {
-  id: number;
+  id?: number;
   title: string;
-  slug: string;
+  slug?: string;
   image: string;
   content: string;
-  status: number;
-  created_at: string;
-  updated_at: string;
+  status?: number;
+  created_at?: string;
+  updated_at?: string;
 }

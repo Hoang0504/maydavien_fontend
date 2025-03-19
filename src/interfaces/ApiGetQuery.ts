@@ -1,7 +1,8 @@
 interface ApiGetQuery {
-  page?: number;
-  pageSize?: number;
+  page?: string;
+  pageSize?: string;
   search?: string;
+  categoryId?: string;
   mode?: string;
 }
 

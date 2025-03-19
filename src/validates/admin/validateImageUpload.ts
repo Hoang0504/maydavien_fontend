@@ -1,6 +1,5 @@
-// validation.ts
-const validateImageUpload = (image: File | null) => {
-  if (!image) {
+const validateImageUpload = (images: File | File[] | null) => {
+  if (!images) {
     return { isValid: false, errorMessage: "Image is required." };
   }
 
@@ -11,14 +10,17 @@ const validateImageUpload = (image: File | null) => {
     "image/webp",
   ];
 
-  if (!allowedImageTypes.includes(image.type)) {
-    return {
-      isValid: false,
-      errorMessage:
-        "Định dạng ảnh tải lên không hợp lệ. Chỉ những ảnh có đuôi JPEG, PNG, GIF, and WEBP mới được cho phép.",
-    };
-  }
+  const imageArray = Array.isArray(images) ? images : [images];
 
+  for (const image of imageArray) {
+    if (!allowedImageTypes.includes(image.type)) {
+      return {
+        isValid: false,
+        errorMessage:
+          "Định dạng ảnh tải lên không hợp lệ. Chỉ những ảnh có đuôi JPEG, PNG, GIF, and WEBP mới được cho phép.",
+      };
+    }
+  }
   return { isValid: true, errorMessage: "" };
 };
 

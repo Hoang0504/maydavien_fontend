@@ -1,9 +1,8 @@
-import { encodeString } from "@/utils";
-
 const validateBannerForm = (
   title: string,
   subTitle: string,
-  image: string | null
+  image: string,
+  type: string
 ) => {
   if (!title || title.trim().length < 3) {
     return {
@@ -19,16 +18,16 @@ const validateBannerForm = (
     };
   }
 
-  if (!image) {
+  if (!image && type !== "edit") {
     return { isValid: false, errorMessage: "Ảnh không được để trống." };
   }
 
   return {
     isValid: true,
     data: {
-      title: encodeString(title),
-      sub_title: encodeString(subTitle), // Convert subTitle to sub_title
-      image: encodeString(image),
+      title,
+      sub_title: subTitle, // Convert subTitle to sub_title
+      image,
     },
     errorMessage: "",
   };

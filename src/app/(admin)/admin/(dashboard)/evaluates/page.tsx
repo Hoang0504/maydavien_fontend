@@ -43,6 +43,8 @@ export default function EvaluateManagement() {
   const pageSize = 5;
   const [totalPages, setTotalPages] = useState<number>(0);
 
+  const [hasHandled, setHasHandled] = useState<boolean>(false);
+
   const handleClickAddEvaluateButton = () => {
     setModalType("add");
     setOpenModal(true);
@@ -89,12 +91,12 @@ export default function EvaluateManagement() {
       }
 
       if (modalType === "edit") {
-        setNewEditAvatar(response.files[0]);
+        setNewEditAvatar(getFilenameAndExtension(response.files[0]));
       } else {
-        setAvatar(response.files[0]);
+        setAvatar(getFilenameAndExtension(response.files[0]));
       }
 
-      setAvatarPreview(URL.createObjectURL(file));
+      setAvatarPreview(response.files[0]);
     }
   };
 
@@ -130,10 +132,11 @@ export default function EvaluateManagement() {
   const handleSubmit = async () => {
     const validation = validateEvaluateForm(
       name,
-      newEditAvatar || avatar,
+      modalType === "edit" ? newEditAvatar : avatar,
       rate,
       email,
-      content
+      content,
+      modalType
     );
     if (validation.isValid) {
       let response = null;
@@ -162,6 +165,7 @@ export default function EvaluateManagement() {
           handleClearAvatarPreview();
         } else {
           setOpenModal(false);
+          setHasHandled(true);
           if (page === 1 && modeData === "active") {
             fetchEvaluatesData();
           } else {
@@ -207,34 +211,6 @@ export default function EvaluateManagement() {
     }
   };
 
-  const handleCancel = () => {
-    if (modalType === "add") {
-      if (avatar) {
-        handleClearAvatarPreview();
-      }
-    } else if (modalType === "edit" && newEditAvatar) {
-      handleClearAvatarPreview();
-    }
-    setOpenModal(false);
-  };
-
-  const fetchEvaluatesData = async (mode: string = "active") => {
-    const response = await getEvaluates({ page, pageSize, mode });
-    const normalizedData = normalizeObject(
-      response.data
-    ) as unknown as Evaluate[];
-    setEvaluates(normalizedData);
-    setTotalPages(
-      response.total_pages ? parseInt(response.total_pages.toString()) : 0
-    );
-  };
-
-  useEffect(() => {
-    fetchEvaluatesData(modeData);
-  }, [page, modeData]);
-
-  if (!evaluates) return <NotFoundPage />;
-
   const openEditModal = (evaluate: Evaluate) => {
     setId(evaluate.id || 0);
     setName(evaluate.name);
@@ -256,6 +232,48 @@ export default function EvaluateManagement() {
     setModalType(modalType);
     setOpenModal(true);
   };
+
+  const handleCancel = () => {
+    if (modalType === "add" && avatar) {
+      handleClearAvatarPreview();
+    } else if (modalType === "edit" && newEditAvatar) {
+      handleClearAvatarPreview();
+    }
+    setOpenModal(false);
+
+    setHasHandled(true);
+  };
+
+  const fetchEvaluatesData = async (mode: string = "active") => {
+    const response = await getEvaluates({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      mode,
+    });
+    const normalizedData = normalizeObject(
+      response.data
+    ) as unknown as Evaluate[];
+    setEvaluates(normalizedData);
+    setTotalPages(
+      response.total_pages ? parseInt(response.total_pages.toString()) : 0
+    );
+  };
+
+  useEffect(() => {
+    fetchEvaluatesData(modeData);
+  }, [page, modeData]);
+
+  useEffect(() => {
+    if (openModal) {
+      setHasHandled(false);
+    }
+
+    if (!openModal && !hasHandled) {
+      handleCancel();
+    }
+  }, [openModal]);
+
+  if (!evaluates) return <NotFoundPage />;
 
   return (
     <div className="container mx-auto py-6">

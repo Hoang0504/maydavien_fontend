@@ -3,12 +3,19 @@ import { handleGetDataApi } from "@/utils";
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/images`;
 
 export const uploadImages = async (
-  selectedImageFile: File,
+  selectedImageFile: File | File[],
   adminToken: string,
   handleAdminLogout?: () => void
 ) => {
   const formData = new FormData();
-  formData.append("images", selectedImageFile);
+
+  if (Array.isArray(selectedImageFile)) {
+    selectedImageFile.forEach((imageFile) =>
+      formData.append("images", imageFile)
+    );
+  } else {
+    formData.append("images", selectedImageFile);
+  }
 
   const response = await handleGetDataApi(
     `${API_URL}/upload`,

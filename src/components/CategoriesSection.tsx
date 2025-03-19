@@ -16,7 +16,7 @@ export default function CategoriesSection({ id }: { id: string }) {
 
   const fetchCategoriesData = async () => {
     setLoading(true);
-    const data = await getCategories();
+    const data = await getCategories({ mode: "all-active" });
     setCategories(data.data);
     setLoading(false);
   };

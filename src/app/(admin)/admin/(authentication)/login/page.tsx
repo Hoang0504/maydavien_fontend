@@ -22,10 +22,15 @@ function Login() {
       setTextError("");
       const response = await getUserLogin(username, password);
       if (response) {
-        handleAdminLogin(response);
-        return;
+        if (response.token && response.user) {
+          handleAdminLogin(response);
+        } else if (
+          response.error &&
+          response.message === "Invalid username or password"
+        ) {
+          setTextError("Tên người dùng hoặc mật khẩu không đúng");
+        }
       }
-      setTextError("Tên người dùng hoặc mật khẩu không đúng");
     } else {
       setTextError(validation.errorMessage);
     }

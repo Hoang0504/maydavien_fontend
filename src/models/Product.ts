@@ -1,11 +1,11 @@
 export interface Product {
-  id: number;
+  id?: number;
   name: string;
-  slug: string;
+  slug?: string;
   image: string;
   price: number;
   old_price: number;
-  category: {
+  category?: {
     id: number;
     name: string;
     slug: string;
@@ -16,13 +16,14 @@ export interface Product {
     updated_at: string;
   };
   attributes: {
-    id: number;
+    id?: number;
     name: string;
     value: string;
   }[];
   images: string[];
+  deletedImages?: string[];
   description: string;
-  status: number;
-  created_at: string;
-  updated_at: string;
+  status?: number;
+  created_at?: string;
+  updated_at?: string;
 }

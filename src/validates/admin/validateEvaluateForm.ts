@@ -1,11 +1,12 @@
-import { emailRegex, encodeString } from "@/utils";
+import { emailRegex } from "@/utils";
 
 const validateEvaluateForm = (
   name: string,
   avatar: string,
   rate: number,
   email: string,
-  content: string
+  content: string,
+  type: string
 ) => {
   if (!name || name.trim().length < 3) {
     return {
@@ -14,7 +15,7 @@ const validateEvaluateForm = (
     };
   }
 
-  if (!avatar) {
+  if (!avatar && type !== "edit") {
     return {
       isValid: false,
       errorMessage: "Ảnh đại diện không được để trống.",
@@ -35,21 +36,21 @@ const validateEvaluateForm = (
     };
   }
 
-  if (content.trim().length < 5) {
+  if (content.trim().length < 10) {
     return {
       isValid: false,
-      errorMessage: "Nội dung đánh giá phải có ít nhất 5 ký tự.",
+      errorMessage: "Nội dung đánh giá phải có ít nhất 10 ký tự.",
     };
   }
 
   return {
     isValid: true,
     data: {
-      name: encodeString(name),
-      avatar: encodeString(avatar),
+      name,
+      avatar,
       rate,
-      email: encodeString(email),
-      content: encodeString(content),
+      email,
+      content,
     },
     errorMessage: "",
   };

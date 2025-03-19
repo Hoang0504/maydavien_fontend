@@ -1,9 +1,8 @@
-import { encodeString } from "@/utils";
-
 const validateCategoryForm = (
   name: string,
-  image: string | null,
-  description: string
+  image: string,
+  description: string,
+  type: string
 ) => {
   if (!name || name.trim().length < 3) {
     return {
@@ -19,16 +18,16 @@ const validateCategoryForm = (
     };
   }
 
-  if (!image) {
+  if (!image && type !== "edit") {
     return { isValid: false, errorMessage: "Ảnh không được để trống." };
   }
 
   return {
     isValid: true,
     data: {
-      name: encodeString(name),
-      image: encodeString(image),
-      description: encodeString(description),
+      name,
+      image,
+      description,
     },
     errorMessage: "",
   };

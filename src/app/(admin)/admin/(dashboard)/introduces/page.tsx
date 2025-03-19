@@ -45,6 +45,8 @@ export default function IntroduceManagement() {
   const pageSize = 5;
   const [totalPages, setTotalPages] = useState<number>(0);
 
+  const [hasHandled, setHasHandled] = useState<boolean>(false);
+
   const handleClickAddIntroduceButton = () => {
     setModalType("add");
     setOpenModal(true);
@@ -92,12 +94,12 @@ export default function IntroduceManagement() {
       }
 
       if (modalType === "edit") {
-        setNewEditImage(response.files[0]);
+        setNewEditImage(getFilenameAndExtension(response.files[0]));
       } else {
-        setImage(response.files[0]);
+        setImage(getFilenameAndExtension(response.files[0]));
       }
 
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(response.files[0]);
     }
   };
 
@@ -135,9 +137,10 @@ export default function IntroduceManagement() {
       title,
       subTitle,
       description,
-      newEditImage || image,
+      modalType === "edit" ? newEditImage : image,
       linkTitle,
-      type
+      type,
+      modalType
     );
     if (validation.isValid) {
       let response = null;
@@ -165,6 +168,7 @@ export default function IntroduceManagement() {
           }
           handleClearImagePreview();
         } else {
+          setHasHandled(true);
           setOpenModal(false);
           if (page === 1 && modeData === "active") {
             fetchIntroducesData();
@@ -211,37 +215,6 @@ export default function IntroduceManagement() {
     }
   };
 
-  const handleCancel = () => {
-    if (modalType === "add") {
-      if (image) {
-        handleClearImagePreview();
-      }
-    } else if (modalType === "edit" && newEditImage) {
-      handleClearImagePreview();
-    }
-    setOpenModal(false);
-  };
-
-  const fetchIntroducesData = async (mode: string = "active") => {
-    const response = await getIntroduces(
-      { page, pageSize, mode },
-      handleAdminLogout
-    );
-    const normalizedData = normalizeObject(
-      response.data
-    ) as unknown as Introduce[];
-    setIntroduces(normalizedData);
-    setTotalPages(
-      response.total_pages ? parseInt(response.total_pages.toString()) : 0
-    );
-  };
-
-  useEffect(() => {
-    fetchIntroducesData(modeData);
-  }, [page, modeData]);
-
-  if (!introduces) return <NotFoundPage />;
-
   const openEditModal = (introduce: Introduce) => {
     setId(introduce.id || 0);
     setTitle(introduce.title);
@@ -264,6 +237,46 @@ export default function IntroduceManagement() {
     setModalType(modalType);
     setOpenModal(true);
   };
+
+  const handleCancel = () => {
+    if (modalType === "add" && image) {
+      handleClearImagePreview();
+    } else if (modalType === "edit" && newEditImage) {
+      handleClearImagePreview();
+    }
+    setOpenModal(false);
+    setHasHandled(true);
+  };
+
+  const fetchIntroducesData = async (mode: string = "active") => {
+    const response = await getIntroduces(
+      { page: page.toString(), pageSize: pageSize.toString(), mode },
+      handleAdminLogout
+    );
+    const normalizedData = normalizeObject(
+      response.data
+    ) as unknown as Introduce[];
+    setIntroduces(normalizedData);
+    setTotalPages(
+      response.total_pages ? parseInt(response.total_pages.toString()) : 0
+    );
+  };
+
+  useEffect(() => {
+    fetchIntroducesData(modeData);
+  }, [page, modeData]);
+
+  useEffect(() => {
+    if (openModal) {
+      setHasHandled(false);
+    }
+
+    if (!openModal && !hasHandled) {
+      handleCancel();
+    }
+  }, [openModal]);
+
+  if (!introduces) return <NotFoundPage />;
 
   return (
     <div className="container mx-auto py-6">

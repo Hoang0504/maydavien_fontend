@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Editor } from "@tinymce/tinymce-react";
 import Image from "next/image";
 
 import {
-  createBanner,
-  deleteBanner,
-  getBanners,
-  restoreBanner,
-  updateBanner,
-} from "@/services/bannerService";
+  createNews,
+  deleteNews,
+  getNews,
+  restoreNews,
+  updateNews,
+} from "@/services/newsService";
 
 import { getFilenameAndExtension, normalizeObject } from "@/utils";
 import { deleteImage, uploadImages } from "@/services/imageService";
-import { Banner, Banner as BannerModel } from "@/models/Banner";
+import { News } from "@/models/News";
 import { useAuthentication } from "@/context/authenticationContext";
-import { validateBannerForm, validateImageUpload } from "@/validates/admin";
+import { validateNewsForm, validateImageUpload } from "@/validates/admin";
 
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
@@ -24,16 +25,16 @@ import DialogTitle from "@/components/ui/DialogTitle";
 import PaginationBar from "@/components/PaginationBar";
 import DialogContent from "@/components/ui/DialogContent";
 
-export default function BannerManagement() {
+export default function NewsManagement() {
   const { adminToken, handleAdminLogout } = useAuthentication();
-  const [banners, setBanners] = useState<BannerModel[]>([]);
+  const [news, setNews] = useState<News[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [modeData, setModeData] = useState("active");
   const [id, setId] = useState(0);
-  const [title, setTitle] = useState("");
-  const [subTitle, setSubTitle] = useState("");
+  const [title, setName] = useState("");
   const [image, setImage] = useState<string>("");
+  const [content, setContent] = useState("");
   const [newEditImage, setNewEditImage] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [textError, setTextError] = useState("");
@@ -43,11 +44,11 @@ export default function BannerManagement() {
 
   const [hasHandled, setHasHandled] = useState<boolean>(false);
 
-  const handleClickAddBannerButton = () => {
+  const handleClickAddNewsButton = () => {
     setModalType("add");
     setOpenModal(true);
-    setTitle("");
-    setSubTitle("");
+    setName("");
+    setContent("");
     setImage("");
     setImagePreview("");
     setTextError("");
@@ -61,7 +62,7 @@ export default function BannerManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "banner",
+        "news",
         handleAdminLogout
       );
       if (response) {
@@ -102,19 +103,21 @@ export default function BannerManagement() {
       response = await deleteImage(
         newEditImage,
         adminToken,
-        "banner",
+        "news",
         handleAdminLogout
       );
     } else if (modalType === "add" && image) {
       response = await deleteImage(
         image,
         adminToken,
-        "banner",
+        "news",
         handleAdminLogout
       );
     }
     if (response) {
-      setImage("");
+      if (modalType !== "edit") {
+        setImage("");
+      }
       setNewEditImage("");
       setImagePreview("");
       setTextError("");
@@ -124,24 +127,24 @@ export default function BannerManagement() {
   };
 
   const handleSubmit = async () => {
-    const validation = validateBannerForm(
+    const validation = validateNewsForm(
       title,
-      subTitle,
       modalType === "edit" ? newEditImage : image,
+      content,
       modalType
     );
-    if (validation.isValid) {
+    if (validation?.isValid) {
       let response = null;
       setTextError("");
       if (validation.data) {
         if (modalType === "add") {
-          response = await createBanner(
+          response = await createNews(
             validation.data,
             adminToken,
             handleAdminLogout
           );
         } else if (modalType === "edit") {
-          response = await updateBanner(
+          response = await updateNews(
             { ...validation.data, id },
             adminToken,
             handleAdminLogout
@@ -150,14 +153,16 @@ export default function BannerManagement() {
       }
       if (response) {
         if (response.error) {
-          if (response.message === "Banner title already exists.") {
-            setTextError("Tên banner đã tồn tại!");
+          if (response.message === "News title already exists.") {
+            setTextError("Tiêu đề bài viết đã tồn tại!");
+            return;
           }
+          handleClearImagePreview();
         } else {
           setOpenModal(false);
           setHasHandled(true);
           if (page === 1 && modeData === "active") {
-            fetchBannersData();
+            fetchNewsData();
           } else {
             setPage(1);
             setModeData("active");
@@ -167,16 +172,12 @@ export default function BannerManagement() {
         setTextError("Thao tác không thành công!");
       }
     } else {
-      setTextError(validation.errorMessage);
+      setTextError(validation?.errorMessage || "");
     }
   };
 
-  const handleRestore = async (bannerId: number) => {
-    const response = await restoreBanner(
-      bannerId,
-      adminToken,
-      handleAdminLogout
-    );
+  const handleRestore = async (newsId: number) => {
+    const response = await restoreNews(newsId, adminToken, handleAdminLogout);
     if (response) {
       setPage(1);
       setModeData("active");
@@ -184,16 +185,11 @@ export default function BannerManagement() {
   };
 
   const handleDelete = async (model: string) => {
-    const response = await deleteBanner(
-      id,
-      adminToken,
-      model,
-      handleAdminLogout
-    );
+    const response = await deleteNews(id, adminToken, model, handleAdminLogout);
     if (response) {
       setOpenModal(false);
       if (page === 1 && modeData === "active") {
-        fetchBannersData();
+        fetchNewsData();
       } else {
         setPage(1);
         setModeData("active");
@@ -201,22 +197,22 @@ export default function BannerManagement() {
     }
   };
 
-  const openEditModal = (banner: BannerModel) => {
-    setId(banner.id || 0);
-    setTitle(banner.title);
-    setSubTitle(banner.sub_title || "");
-    setImage(getFilenameAndExtension(banner.image));
+  const openEditModal = (news: News) => {
+    setId(news.id || 0);
+    setName(news.title);
+    setContent(news.content);
+    setImage(getFilenameAndExtension(news.image));
     setNewEditImage("");
 
-    setImagePreview(banner.image);
+    setImagePreview(news.image);
     setTextError("");
     setModalType("edit");
     setOpenModal(true);
   };
 
-  const handleSetDeleteState = (banner: Banner, modalType: string) => {
-    setId(banner.id || 0);
-    setTitle(banner.title);
+  const handleSetDeleteState = (news: News, modalType: string) => {
+    setId(news.id || 0);
+    setName(news.title);
     setModalType(modalType);
     setOpenModal(true);
   };
@@ -228,25 +224,25 @@ export default function BannerManagement() {
       handleClearImagePreview();
     }
     setOpenModal(false);
+
     setHasHandled(true);
   };
 
-  const fetchBannersData = async (mode: string = "active") => {
-    const response = await getBanners(
-      { page: page.toString(), pageSize: pageSize.toString(), mode },
-      handleAdminLogout
-    );
-    const normalizedData = normalizeObject(
-      response.data
-    ) as unknown as Banner[];
-    setBanners(normalizedData);
+  const fetchNewsData = async (mode: string = "active") => {
+    const response = await getNews({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      mode,
+    });
+    const normalizedData = normalizeObject(response.data) as unknown as News[];
+    setNews(normalizedData);
     setTotalPages(
       response.total_pages ? parseInt(response.total_pages.toString()) : 0
     );
   };
 
   useEffect(() => {
-    fetchBannersData(modeData);
+    fetchNewsData(modeData);
   }, [page, modeData]);
 
   useEffect(() => {
@@ -259,12 +255,12 @@ export default function BannerManagement() {
     }
   }, [openModal]);
 
-  if (!banners) return <NotFoundPage />;
+  if (!news) return <NotFoundPage />;
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-4">Quản lý banner</h1>
-      <Button className="mb-4" onClick={handleClickAddBannerButton}>
+      <h1 className="text-2xl font-bold mb-4">Quản lý bài viết</h1>
+      <Button className="mb-4" onClick={handleClickAddNewsButton}>
         + Thêm mới
       </Button>
       <Button
@@ -275,7 +271,7 @@ export default function BannerManagement() {
           setModeData("active");
         }}
       >
-        Banner có sẵn
+        Bài viết có sẵn
       </Button>
       <Button
         className="mb-4 ml-4"
@@ -285,19 +281,19 @@ export default function BannerManagement() {
           setModeData("inactive");
         }}
       >
-        Banner đã xóa tạm thời
+        Bài viết đã xóa tạm thời
       </Button>
-      <table className="w-full text-left table-auto min-w-max">
+      <table className="w-full max-w-full text-left table-auto">
         <thead>
           <tr>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Mã banner
+              Mã bài viết
             </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Tiêu đề
+              Tiêu đề bài viết
             </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
-              Tiêu đề phụ
+              Nội dung bài viết
             </th>
             <th className="p-4 border-b border-slate-300 bg-slate-50">
               Hành động
@@ -305,28 +301,34 @@ export default function BannerManagement() {
           </tr>
         </thead>
         <tbody>
-          {banners.map((banner) => (
+          {news.map((newsItem) => (
             <tr
-              key={banner.id}
+              key={newsItem.id}
               className={"hover:bg-slate-50 bg-white text-gray-400"}
             >
-              <td className="p-4 border-b border-slate-200">{banner.id}</td>
-              <td className="p-4 border-b border-slate-200">{banner.title}</td>
+              <td className="p-4 border-b border-slate-200">{newsItem.id}</td>
               <td className="p-4 border-b border-slate-200">
-                {banner.sub_title}
+                {newsItem.title}
               </td>
               <td className="p-4 border-b border-slate-200">
-                {banner.status ? (
+                <div
+                  className="line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: newsItem.content }}
+                />
+              </td>
+              <td className="p-4 border-b border-slate-200">
+                {newsItem.status ? (
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => openEditModal(banner)}
+                      onClick={() => openEditModal(newsItem)}
                     >
                       Chỉnh sửa
                     </Button>
                     <Button
+                      className="mr-2"
                       variant="destructive"
-                      onClick={() => handleSetDeleteState(banner, "delete")}
+                      onClick={() => handleSetDeleteState(newsItem, "delete")}
                     >
                       Xóa tạm thời
                     </Button>
@@ -335,14 +337,15 @@ export default function BannerManagement() {
                   <>
                     <Button
                       className="mr-2"
-                      onClick={() => handleRestore(banner.id || 0)}
+                      onClick={() => handleRestore(newsItem.id || 0)}
                     >
                       Khôi phục
                     </Button>
                     <Button
+                      className="mr-2"
                       variant="destructive"
                       onClick={() =>
-                        handleSetDeleteState(banner, "delete-force")
+                        handleSetDeleteState(newsItem, "delete-force")
                       }
                     >
                       Xóa viễn viễn
@@ -358,17 +361,19 @@ export default function BannerManagement() {
       <PaginationBar page={page} totalPages={totalPages} setPage={setPage} />
 
       {/* Modal */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+      <Dialog width={800} open={openModal} onClose={() => setOpenModal(false)}>
         <DialogContent>
           <DialogTitle>
-            {modalType === "add" && "Thêm banner"}
-            {modalType === "edit" && "Chỉnh sửa banner"}
+            {modalType === "add" && "Thêm bài viết"}
+            {modalType === "edit" && "Chỉnh sửa bài viết"}
             {modalType === "delete" && "Xác nhận xóa"}
           </DialogTitle>
           <div className="p-4">
             {(modalType === "add" || modalType === "edit") && (
               <form>
                 {textError && <div className="text-red-500">{textError}</div>}
+
+                {/* Name */}
                 <div className="mb-4">
                   <label
                     htmlFor="title"
@@ -380,35 +385,19 @@ export default function BannerManagement() {
                     id="title"
                     type="text"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập tiêu đề"
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label
-                    htmlFor="subTitle"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Mô tả phụ
-                  </label>
-                  <input
-                    id="subTitle"
-                    type="text"
-                    value={subTitle}
-                    onChange={(e) => setSubTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mô tả phụ"
-                  />
-                </div>
-
+                {/* Image */}
                 <div className="mb-4">
                   <label
                     htmlFor="image"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Chọn ảnh
+                    Ảnh bài viết
                   </label>
                   <input
                     id="image"
@@ -433,7 +422,7 @@ export default function BannerManagement() {
                       />
                       <button
                         type="button"
-                        onClick={handleClearImagePreview} // Clear the preview when clicked
+                        onClick={handleClearImagePreview}
                         className="absolute top-2 right-2 text-white bg-black bg-opacity-50 hover:bg-opacity-75 rounded-full p-1"
                       >
                         <svg
@@ -454,18 +443,56 @@ export default function BannerManagement() {
                     </div>
                   </div>
                 )}
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="content"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Mô tả
+                  </label>
+                  <Editor
+                    apiKey="v5pij1okvrobhmxz0xowm11k3o9ftcmbxpm3cqsjhk56y0ac"
+                    value={content}
+                    init={{
+                      height: 300,
+                      menubar: false,
+                      plugins: ["image"],
+                      toolbar:
+                        "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | image | removeformat | help",
+                      automatic_uploads: true,
+                      images_upload_handler: (blobInfo: {
+                        blob: () => Blob;
+                      }) => {
+                        return new Promise((resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            if (reader.result) {
+                              resolve(reader.result.toString());
+                            } else {
+                              reject("Failed to read file");
+                            }
+                          };
+                          reader.onerror = () => reject("File reading error");
+                          reader.readAsDataURL(blobInfo.blob());
+                        });
+                      },
+                    }}
+                    onEditorChange={setContent}
+                  />
+                </div>
               </form>
             )}
             {(modalType === "delete" || modalType === "delete-force") && (
               <p>
-                Bạn có chắc chắn muốn xóa banner {title}{" "}
+                Bạn có chắc chắn muốn xóa bài viết {title}{" "}
                 {modalType === "delete-force" && "viễn viễn"} không?
               </p>
             )}
             <div className="mt-4 flex justify-end space-x-2">
               {(modalType === "add" || modalType === "edit") && (
                 <Button variant="green" onClick={handleSubmit}>
-                  {modalType === "add" ? "Thêm banner" : "Cập nhật banner"}
+                  {modalType === "add" ? "Thêm bài viết" : "Cập nhật bài viết"}
                 </Button>
               )}
               {(modalType === "delete" || modalType === "delete-force") && (

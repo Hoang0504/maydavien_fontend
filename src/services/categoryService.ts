@@ -1,23 +1,13 @@
 import { ApiGetQuery } from "@/interfaces";
-import { handleGetDataApi } from "@/utils";
 import { Category } from "@/models/Category";
+import { getMethodDataWithParameters, handleGetDataApi } from "@/utils";
 
 const API_GET_URL = `${process.env.NEXT_PUBLIC_API_URL}/categories`;
 
 export const getCategories = async (
   query: ApiGetQuery,
   handleAdminLogout?: () => void
-) => {
-  const url = new URL(API_GET_URL);
-  if (query.page) url.searchParams.append("page", query.page.toString());
-  if (query.pageSize)
-    url.searchParams.append("pageSize", query.pageSize.toString());
-  if (query.search) url.searchParams.append("search", query.search);
-  if (query.mode === "inactive") {
-    url.searchParams.append("mode", query.mode);
-  }
-  return handleGetDataApi(url.toString(), handleAdminLogout);
-};
+) => getMethodDataWithParameters(query, API_GET_URL, handleAdminLogout);
 
 export const getCategoriesById = async (id: number) =>
   handleGetDataApi(`${API_GET_URL}/${id}`);

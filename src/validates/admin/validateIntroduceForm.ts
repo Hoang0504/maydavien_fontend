@@ -1,12 +1,11 @@
-import { encodeString } from "@/utils";
-
 const validateIntroduceForm = (
   title: string,
   subTitle: string,
   description: string,
-  image: string | null,
-  linkTitle: string | null,
-  type: number
+  image: string,
+  linkTitle: string,
+  type: number,
+  mode: string
 ) => {
   if (!title || title.trim().length < 3) {
     return {
@@ -29,7 +28,7 @@ const validateIntroduceForm = (
     };
   }
 
-  if (!image) {
+  if (!image && mode !== "edit") {
     return { isValid: false, errorMessage: "Ảnh không được để trống." };
   }
 
@@ -50,11 +49,11 @@ const validateIntroduceForm = (
   return {
     isValid: true,
     data: {
-      title: encodeString(title),
-      sub_title: encodeString(subTitle),
-      description: encodeString(description),
-      image: encodeString(image),
-      link_title: encodeString(linkTitle),
+      title,
+      sub_title: subTitle,
+      description,
+      image,
+      link_title: linkTitle,
       type,
     },
     errorMessage: "",

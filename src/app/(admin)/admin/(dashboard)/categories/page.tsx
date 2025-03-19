@@ -39,8 +39,10 @@ export default function CategoryManagement() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [textError, setTextError] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 2;
+  const pageSize = 5;
   const [totalPages, setTotalPages] = useState<number>(0);
+
+  const [hasHandled, setHasHandled] = useState<boolean>(false);
 
   const handleClickAddCategoryButton = () => {
     setModalType("add");
@@ -86,12 +88,12 @@ export default function CategoryManagement() {
       }
 
       if (modalType === "edit") {
-        setNewEditImage(response.files[0]);
+        setNewEditImage(getFilenameAndExtension(response.files[0]));
       } else {
-        setImage(response.files[0]);
+        setImage(getFilenameAndExtension(response.files[0]));
       }
 
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(response.files[0]);
     }
   };
 
@@ -127,8 +129,9 @@ export default function CategoryManagement() {
   const handleSubmit = async () => {
     const validation = validateCategoryForm(
       name,
-      newEditImage || image,
-      description
+      modalType === "edit" ? newEditImage : image,
+      description,
+      modalType
     );
     if (validation.isValid) {
       let response = null;
@@ -157,6 +160,7 @@ export default function CategoryManagement() {
           handleClearImagePreview();
         } else {
           setOpenModal(false);
+          setHasHandled(true);
           if (page === 1 && modeData === "active") {
             fetchCategoriesData();
           } else {
@@ -202,37 +206,6 @@ export default function CategoryManagement() {
     }
   };
 
-  const handleCancel = () => {
-    if (modalType === "add") {
-      if (image) {
-        handleClearImagePreview();
-      }
-    } else if (modalType === "edit" && newEditImage) {
-      handleClearImagePreview();
-    }
-    setOpenModal(false);
-  };
-
-  const fetchCategoriesData = async (mode: string = "active") => {
-    const response = await getCategories(
-      { page, pageSize, mode },
-      handleAdminLogout
-    );
-    const normalizedData = normalizeObject(
-      response.data
-    ) as unknown as Category[];
-    setCategories(normalizedData);
-    setTotalPages(
-      response.total_pages ? parseInt(response.total_pages.toString()) : 0
-    );
-  };
-
-  useEffect(() => {
-    fetchCategoriesData(modeData);
-  }, [page, modeData]);
-
-  if (!categories) return <NotFoundPage />;
-
   const openEditModal = (category: Category) => {
     setId(category.id || 0);
     setName(category.name);
@@ -252,6 +225,46 @@ export default function CategoryManagement() {
     setModalType(modalType);
     setOpenModal(true);
   };
+
+  const handleCancel = () => {
+    if (modalType === "add" && image) {
+      handleClearImagePreview();
+    } else if (modalType === "edit" && newEditImage) {
+      handleClearImagePreview();
+    }
+    setOpenModal(false);
+    setHasHandled(true);
+  };
+
+  const fetchCategoriesData = async (mode: string = "active") => {
+    const response = await getCategories(
+      { page: page.toString(), pageSize: pageSize.toString(), mode },
+      handleAdminLogout
+    );
+    const normalizedData = normalizeObject(
+      response.data
+    ) as unknown as Category[];
+    setCategories(normalizedData);
+    setTotalPages(
+      response.total_pages ? parseInt(response.total_pages.toString()) : 0
+    );
+  };
+
+  useEffect(() => {
+    fetchCategoriesData(modeData);
+  }, [page, modeData]);
+
+  useEffect(() => {
+    if (openModal) {
+      setHasHandled(false);
+    }
+
+    if (!openModal && !hasHandled) {
+      handleCancel();
+    }
+  }, [openModal]);
+
+  if (!categories) return <NotFoundPage />;
 
   return (
     <div className="container mx-auto py-6">

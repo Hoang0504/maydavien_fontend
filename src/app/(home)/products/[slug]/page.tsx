@@ -49,8 +49,8 @@ export default function ProductDetail() {
     <div className="container mx-auto py-10">
       <div className="breadcrumb text-orange-600 font-normal mb-4">
         <Link href={routes.home}>Trang chủ</Link> {">"}{" "}
-        <Link href={routes.categories + "/" + product.category.slug}>
-          {product.category.name}
+        <Link href={routes.categories + "/" + product?.category?.slug}>
+          {product?.category?.name}
         </Link>{" "}
         {">"} <span>{product.name}</span>
       </div>
@@ -108,7 +108,7 @@ export default function ProductDetail() {
             <h3 className="text-lg font-semibold mb-3">Thông số kỹ thuật</h3>
             <ul className="space-y-2">
               {product.attributes.map(
-                (attr: { id: number; name: string; value: string }) => (
+                (attr: { id?: number; name: string; value: string }) => (
                   <li key={attr.id} className="flex justify-between">
                     <span>{attr.name}:</span>
                     <span className="font-semibold">{attr.value}</span>

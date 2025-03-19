@@ -13,6 +13,8 @@ const routes = {
     categories: "/admin/categories",
     introduces: "/admin/introduces",
     evaluates: "/admin/evaluates",
+    news: "/admin/news",
+    products: "/admin/products",
   },
 };
 
