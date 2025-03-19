@@ -54,7 +54,6 @@ export default function ProductManagement() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [newEditImages, setNewEditImages] = useState<string[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
-  // const [originalEditImages, setOriginalEditImages] = useState<string[]>([]);
   const [deletedEditImages, setDeletedEditImages] = useState<string[]>([]);
   const [textError, setTextError] = useState("");
   const [page, setPage] = useState(1);
@@ -97,7 +96,6 @@ export default function ProductManagement() {
     setAttributes((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // index: number
   const handleAddCustomAttribute = () => {
     const customAttr = window.prompt("Enter the new attribute name:");
 
@@ -205,13 +203,9 @@ export default function ProductManagement() {
             "product",
             handleAdminLogout
           );
-          // if (response) {
-          // }
         }
-        // if (!response.error) {
         setImagePreview("");
         setNewEditImage("");
-        // }
       } else if (indexImages === undefined) {
         // case 3: delete all images (newEditImage & newEditImages)
         if (newEditImage) {
@@ -232,7 +226,6 @@ export default function ProductManagement() {
         }
       } else {
         // case 2 delete a specific image from images
-        // Preview
         const imageToDelete = imagesPreview[indexImages];
 
         if (!imageToDelete) return;
@@ -269,10 +262,8 @@ export default function ProductManagement() {
             "product",
             handleAdminLogout
           );
-          // if (!response.error) {
           setImage("");
           setImagePreview("");
-          // }
         }
       } else if (indexImages === undefined) {
         // case 3: delete all images (image & images)
@@ -283,10 +274,6 @@ export default function ProductManagement() {
             "product",
             handleAdminLogout
           );
-          // if (response) {
-          //   setImage("");
-          //   setImagePreview("");
-          // }
         }
         if (images.length > 0) {
           response = await deleteImage(
@@ -295,14 +282,9 @@ export default function ProductManagement() {
             "product_image",
             handleAdminLogout
           );
-          // if (response) {
-          //   setImages([]);
-          //   setImagesPreview([]);
-          // }
         }
       } else {
         // case 2 delete a specific image from images
-        // Preview
         const imageToDelete = images[indexImages];
         if (!imageToDelete) return;
 

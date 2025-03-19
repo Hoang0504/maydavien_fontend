@@ -5,7 +5,6 @@ import { getMethodDataWithParameters, handleGetDataApi } from "@/utils";
 const API_GET_5_LATEST_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news?latest="true"`;
 const API_GET_NEWS = `${process.env.NEXT_PUBLIC_API_URL}/news`;
 
-//
 export const getLatestNews = async (): Promise<ApiResponse<News[]>> =>
   handleGetDataApi(API_GET_5_LATEST_NEWS);
 
