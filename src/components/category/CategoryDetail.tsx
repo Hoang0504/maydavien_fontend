@@ -10,7 +10,7 @@ import { getCategoryBySlug } from "@/services/categoryService";
 import { useLoading } from "@/context/loadingContext";
 import routes from "@/config";
 import NotFoundPage from "@/components/NotFoundPage";
-import ProductSection from "@/components/ProductSection";
+import ProductSection from "../product/ProductSection";
 
 export default function CategoryDetail() {
   const { setLoading } = useLoading();
@@ -19,7 +19,8 @@ export default function CategoryDetail() {
 
   const fetchCategoryData = async () => {
     setLoading(true);
-    const data = await getCategoryBySlug(slug);
+    const categorySlug = slug.split(".html")[0];
+    const data = await getCategoryBySlug(categorySlug);
     setCategory(data.data);
     setLoading(false);
   };
@@ -40,14 +41,15 @@ export default function CategoryDetail() {
       </Link>
       <h1 className="text-3xl font-bold text-center mb-8">{category.name}</h1>
       <div className="text-lg text-center">{category.description}</div>
-      <Image
-        src={category.image}
-        alt={category.name}
-        width={800}
-        height={500}
-        className="object-cover mx-auto rounded-lg shadow-lg mb-6"
-        loading="lazy"
-      />
+      <div className="w-[300px] h-[300px] m-auto relative">
+        <Image
+          src={category.image}
+          alt={category.name}
+          fill
+          className="object-cover mx-auto rounded-lg shadow-lg mb-6"
+          loading="lazy"
+        />
+      </div>
       <ProductSection category={category} />
     </div>
   );

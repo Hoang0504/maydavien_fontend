@@ -48,9 +48,8 @@ function Banner() {
             <Image
               src={banner.image}
               alt={banner.title}
-              width={1920}
-              height={400}
-              className="w-full h-[500px] object-cover"
+              fill
+              className="object-cover"
               loading="lazy"
             />
           </div>

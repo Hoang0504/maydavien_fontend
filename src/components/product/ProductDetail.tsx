@@ -14,7 +14,7 @@ import { useLoading } from "@/context/loadingContext";
 import { getProductBySlug } from "@/services/productService";
 import routes from "@/config";
 import NotFoundPage from "@/components/NotFoundPage";
-export default function ProductDetail() {
+function ProductDetail() {
   const { setLoading } = useLoading();
 
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,8 @@ export default function ProductDetail() {
 
   const fetchProductData = async () => {
     setLoading(true);
-    const data = await getProductBySlug(slug);
+    const productSlug = slug.split(".html")[0];
+    const data = await getProductBySlug(productSlug);
     setProduct(data.data);
     setLoading(false);
   };
@@ -57,15 +58,14 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Left Section */}
         <div className="flex flex-col items-center" ref={galleryRef}>
-          {/* <div className=""> */}
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={600}
-            height={400}
-            className="rounded-lg w-3/5 mb-4 object-cover"
-          />
-          {/* </div> */}
+          <div className="w-3/5 h-[400px] mb-4">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="rounded-lg object-cover"
+            />
+          </div>
           <Swiper
             spaceBetween={0}
             slidesPerView={4}
@@ -78,13 +78,15 @@ export default function ProductDetail() {
             className="w-full grid grid-cols-3 gap-4"
           >
             {product.images.map((img: string, i: number) => (
-              <SwiperSlide key={i}>
+              <SwiperSlide
+                key={i}
+                className="w-full h-[150px] aspect-square object-cover cursor-pointer hover:scale-105 transition-all duration-300"
+              >
                 <Image
                   src={img}
                   alt={product.name}
-                  width={200}
-                  height={150}
-                  className="rounded-lg w-full aspect-square object-cover cursor-pointer hover:scale-105 transition-all duration-300"
+                  fill
+                  className="rounded-lg object-cover"
                 />
               </SwiperSlide>
             ))}
@@ -134,3 +136,5 @@ export default function ProductDetail() {
     </div>
   );
 }
+
+export default ProductDetail;

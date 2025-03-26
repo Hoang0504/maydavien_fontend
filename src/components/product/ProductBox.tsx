@@ -13,16 +13,15 @@ interface ProductBoxProps {
 function ProductBox({ product }: ProductBoxProps) {
   return (
     <Link
-      href={`${routes.products}/${product.slug}`}
+      href={`${routes.products}/${product.slug}.html`}
       className="border rounded-lg p-4 shadow-lg hover:shadow-xl transition hover:scale-105"
     >
       <div className="relative w-full h-[400px] md:h-64 mb-4">
         <Image
           src={product.image}
           alt={product.name}
-          layout="fill"
-          objectFit="cover"
-          className="rounded-lg"
+          fill
+          className="rounded-lg object-cover"
           loading="lazy"
         />
       </div>

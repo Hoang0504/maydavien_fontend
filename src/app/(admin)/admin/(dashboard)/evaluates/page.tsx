@@ -68,12 +68,21 @@ export default function EvaluateManagement() {
         "evaluate",
         handleAdminLogout
       );
-      if (response) {
-        setTextError("");
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
         return;
       }
-      setTextError("Không thể xóa được ảnh này!");
-      return;
+    } else if (modalType === "add" && avatar) {
+      response = await deleteImage(
+        avatar,
+        adminToken,
+        "evaluate",
+        handleAdminLogout
+      );
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
+        return;
+      }
     }
 
     if (files && files.length > 0) {
@@ -423,13 +432,12 @@ export default function EvaluateManagement() {
                     <label className="block text-sm font-medium text-gray-700">
                       Preview ảnh
                     </label>
-                    <div className="w-[100px] bg-gray-100 rounded-md overflow-hidden relative">
+                    <div className="w-[100px] h-[100px] bg-gray-100 rounded-md overflow-hidden relative">
                       <Image
                         src={avatarPreview}
                         alt="Preview"
-                        width={100}
-                        height={100}
-                        className="w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

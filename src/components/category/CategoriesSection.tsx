@@ -8,7 +8,7 @@ import { Category } from "@/models/Category";
 import { getCategories } from "@/services/categoryService";
 import { useLoading } from "@/context/loadingContext";
 import CategoryCard from "./CategoryCard";
-import NotFoundPage from "./NotFoundPage";
+import NotFoundPage from "../NotFoundPage";
 
 export default function CategoriesSection({ id }: { id: string }) {
   const { setLoading } = useLoading();

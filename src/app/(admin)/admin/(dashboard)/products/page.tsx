@@ -18,18 +18,18 @@ import { useAuthentication } from "@/context/authenticationContext";
 import { validateProductForm, validateImageUpload } from "@/validates/admin";
 
 import { Editor } from "@tinymce/tinymce-react";
+import { getCategories } from "@/services/categoryService";
+import { Category } from "@/models/Category";
+import { getAttributes } from "@/services/attributeService";
+import { Attribute } from "@/models/Attribute";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import NotFoundPage from "@/components/NotFoundPage";
 import DialogTitle from "@/components/ui/DialogTitle";
 import PaginationBar from "@/components/PaginationBar";
 import DialogContent from "@/components/ui/DialogContent";
-import { getCategories } from "@/services/categoryService";
-import { Category } from "@/models/Category";
-import { getAttributes } from "@/services/attributeService";
-import { Attribute } from "@/models/Attribute";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 export default function ProductManagement() {
   const { adminToken, handleAdminLogout } = useAuthentication();
@@ -117,12 +117,21 @@ export default function ProductManagement() {
         "product",
         handleAdminLogout
       );
-      if (response) {
-        setTextError("");
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
         return;
       }
-      setTextError("Không thể xóa được ảnh này!");
-      return;
+    } else if (modalType === "add" && image) {
+      response = await deleteImage(
+        image,
+        adminToken,
+        "product",
+        handleAdminLogout
+      );
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
+        return;
+      }
     }
 
     if (files && files.length > 0) {
@@ -645,13 +654,12 @@ export default function ProductManagement() {
                       <label className="block text-sm font-medium text-gray-700">
                         Xem thử ảnh
                       </label>
-                      <div className="w-[100px] bg-gray-100 rounded-md overflow-hidden relative">
+                      <div className="w-[100px] h-[100px] bg-gray-100 rounded-md overflow-hidden relative">
                         <Image
                           src={imagePreview}
                           alt="Preview"
-                          width={100}
-                          height={100}
-                          className="w-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                         <button
                           type="button"
@@ -698,14 +706,13 @@ export default function ProductManagement() {
                     {imagesPreview.map((img: string, i: number) => (
                       <div
                         key={i}
-                        className="w-[100px] bg-gray-100 rounded-md overflow-hidden relative"
+                        className="w-[100px] h-[100px] bg-gray-100 rounded-md overflow-hidden relative"
                       >
                         <Image
                           src={img}
                           alt="Preview"
-                          width={100}
-                          height={100}
-                          className="w-full aspect-square object-cover"
+                          fill
+                          className="aspect-square object-cover"
                         />
                         <button
                           type="button"

@@ -7,7 +7,7 @@ import { Category } from "@/models/Category";
 import { getProducts } from "@/services/productService";
 import { useLoading } from "@/context/loadingContext";
 import ProductBox from "./ProductBox";
-import PaginationBar from "./PaginationBar";
+import PaginationBar from "../PaginationBar";
 
 function ProductSection({
   id,
@@ -25,9 +25,9 @@ function ProductSection({
   const fetchProductsData = async () => {
     setLoading(true);
     const data = await getProducts({
-      page,
-      pageSize,
-      categoryId: category?.id,
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      categoryId: category?.id?.toString() || "",
     });
     setProducts(data.data);
     setTotalPages(data.total_pages ? parseInt(data.total_pages.toString()) : 0);

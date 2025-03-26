@@ -64,12 +64,21 @@ export default function BannerManagement() {
         "banner",
         handleAdminLogout
       );
-      if (response) {
-        setTextError("");
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
         return;
       }
-      setTextError("Không thể xóa được ảnh này!");
-      return;
+    } else if (modalType === "add" && image) {
+      response = await deleteImage(
+        image,
+        adminToken,
+        "banner",
+        handleAdminLogout
+      );
+      if (response.error) {
+        setTextError("Không thể xóa được ảnh này!");
+        return;
+      }
     }
 
     if (files && files.length > 0) {
@@ -91,6 +100,8 @@ export default function BannerManagement() {
       } else {
         setImage(getFilenameAndExtension(response.files[0]));
       }
+
+      // console.log(response.files[0]);
 
       setImagePreview(response.files[0]);
     }
@@ -423,13 +434,12 @@ export default function BannerManagement() {
                     <label className="block text-sm font-medium text-gray-700">
                       Preview ảnh
                     </label>
-                    <div className="w-[100px] bg-gray-100 rounded-md overflow-hidden relative">
+                    <div className="w-[100px] h-[100px] bg-gray-100 rounded-md overflow-hidden relative">
                       <Image
                         src={imagePreview}
                         alt="Preview"
-                        width={100}
-                        height={100}
-                        className="w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

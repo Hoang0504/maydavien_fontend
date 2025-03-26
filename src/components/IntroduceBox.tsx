@@ -43,18 +43,19 @@ export default function IntroduceBox({
           </div>
 
           {/* Hình ảnh */}
-          {/* <div
-            className={` flex justify-center`}
-          > */}
-          <Image
-            className={`${introduce.type === 1 ? "w-full" : "md:w-2/5"}`}
-            src={introduce.image}
-            alt={introduce.title}
-            width={500}
-            height={300}
-            loading="lazy"
-          />
-          {/* </div> */}
+          <div
+            className={`w-full ${
+              introduce.type !== 1 && "md:w-2/5"
+            } h-[400px] relative`}
+          >
+            <Image
+              src={introduce.image}
+              alt={introduce.title}
+              fill
+              loading="lazy"
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
     </div>

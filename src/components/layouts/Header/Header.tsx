@@ -6,8 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import classNames from "classnames/bind";
 
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import headerRoutes from "./headerRoutes";
 import styles from "./Header.module.scss";
@@ -37,13 +38,9 @@ export default function Header() {
           className="flex items-center text-xl font-bold text-blue-900"
         >
           NHẬT ANH
-          <Image
-            src="/logo.jpg"
-            width={50}
-            height={50}
-            alt="Logo"
-            className="ml-2"
-          />
+          <div className="w-[50px] h-[50px] ml-2 aspect-square relative">
+            <Image src="/logo.jpg" fill alt="Logo" className="object-cover" />
+          </div>
         </Link>
 
         <nav

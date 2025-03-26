@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { ZaloIcon } from "@/components/icon";
-import { faAngleUp } from "@fortawesome/free-solid-svg-icons";
+import { faAngleUp } from "@fortawesome/free-solid-svg-icons/faAngleUp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "./Footer.module.scss";

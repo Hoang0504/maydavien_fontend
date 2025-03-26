@@ -3,16 +3,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { News } from "@/models/News";
+import { News as NewsModel } from "@/models/News";
 import { normalizeObject } from "@/utils";
 import { getNews } from "@/services/newsService";
 import { useLoading } from "@/context/loadingContext";
 import NotFoundPage from "@/components/NotFoundPage";
 import PaginationBar from "@/components/PaginationBar";
+import routes from "@/config";
 
-export default function NewsPage() {
+function News() {
   const { setLoading } = useLoading();
-  const [news, setNews] = useState<News[]>([]);
+  const [news, setNews] = useState<NewsModel[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 5;
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -20,10 +21,12 @@ export default function NewsPage() {
   const fetchNewsData = async () => {
     setLoading(true);
     const response = await getNews({
-      page,
-      pageSize,
+      page: page.toString(),
+      pageSize: pageSize.toString(),
     });
-    const normalizedData = normalizeObject(response.data) as unknown as News[];
+    const normalizedData = normalizeObject(
+      response.data
+    ) as unknown as NewsModel[];
     setNews(normalizedData);
     setTotalPages(
       response.total_pages ? parseInt(response.total_pages.toString()) : 0
@@ -49,22 +52,21 @@ export default function NewsPage() {
             className="flex border rounded-lg shadow-lg overflow-hidden"
           >
             <Link
-              href={`/news/${item.slug}`}
-              className="text-red-600 font-semibold w-1/3"
+              href={`${routes.news}/${item.slug}.html`}
+              className="text-red-600 font-semibold w-1/3 h-[300px] relative"
             >
               <Image
                 src={item.image}
                 alt={item.title}
-                width={300}
-                height={200}
-                className="object-cover w-full h-[300px]"
+                fill
+                className="object-cover"
                 loading="lazy"
               />
             </Link>
 
             <div className="p-4 w-2/3">
               <Link
-                href={`/news/${item.slug}`}
+                href={`${routes.news}/${item.slug}.html`}
                 className="text-red-600 font-semibold"
               >
                 <h2 className="text-xl font-bold mb-2">{item.title}</h2>
@@ -74,7 +76,7 @@ export default function NewsPage() {
                 {item.content}
               </p>
               <Link
-                href={`/news/${item.slug}`}
+                href={`${routes.news}/${item.slug}.html`}
                 className="text-red-600 font-semibold"
               >
                 Xem thêm
@@ -88,3 +90,5 @@ export default function NewsPage() {
     </div>
   );
 }
+
+export default News;

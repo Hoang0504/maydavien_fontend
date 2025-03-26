@@ -13,13 +13,19 @@ import Loading from "@/components/Loading";
 import LoadingProvider from "@/context/loadingContext";
 
 import styles from "./body.module.scss";
+import jsonLd from "../jsonLd";
 
 const cx = classNames.bind(styles);
 
 export const metadata: Metadata = {
   title: "Máy đá viên Nhật Anh",
   description: "Chuyên cung cấp máy làm đá viên chất lượng cao.",
-  icons: "/favicon.ico",
+  openGraph: {
+    title: "Máy đá viên Nhật Anh",
+    description: "Chuyên cung cấp máy làm đá viên chất lượng cao.",
+    type: "website",
+    images: [`/logo.jpg`],
+  },
 };
 
 export default function RootLayout({
@@ -50,6 +56,12 @@ export default function RootLayout({
           integrity="sha512-lZD0JiwhtP4UkFD1mc96NiTZ14L7MjyX5Khk8PMxJszXMLvu7kjq1sp4bb0tcL6MY+/4sIuiUxubOqoueHrW4w=="
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
+        ></Script>
+        <Script
+          id="ld+json"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          strategy="lazyOnload"
         ></Script>
       </body>
     </html>

@@ -10,14 +10,15 @@ import { useLoading } from "@/context/loadingContext";
 import routes from "@/config";
 import NotFoundPage from "@/components/NotFoundPage";
 
-export default function NewsDetail() {
+function NewsDetail() {
   const { setLoading } = useLoading();
   const { slug } = useParams<{ slug: string }>();
   const [news, setNews] = useState<News | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
-    const data = await getNewsBySlug(slug);
+    const newsSlug = slug.split(".html")[0];
+    const data = await getNewsBySlug(newsSlug);
     setNews(data.data);
     setLoading(false);
   };
@@ -39,15 +40,18 @@ export default function NewsDetail() {
         Quay lại
       </Link>
       <h1 className="text-3xl font-bold text-center mb-8">{news.title}</h1>
-      <Image
-        src={news.image}
-        alt={news.title}
-        width={800}
-        height={500}
-        className="object-cover mx-auto rounded-lg shadow-lg mb-6"
-        loading="lazy"
-      />
+      <div className="w-[300px] h-[300px] mx-auto mb-6 relative">
+        <Image
+          src={news.image}
+          alt={news.title}
+          fill
+          className="mx-auto rounded-lg shadow-lg object-cover"
+          loading="lazy"
+        />
+      </div>
       <div className="text-lg">{news.content}</div>
     </div>
   );
 }
+
+export default NewsDetail;

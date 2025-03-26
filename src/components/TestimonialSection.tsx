@@ -48,17 +48,16 @@ function TestimonialSection() {
             <SwiperSlide key={evaluate.id}>
               <div className="p-6 border rounded-lg shadow-lg bg-white h-[194px]">
                 <div className="flex items-center mb-4">
-                  <Image
-                    src={evaluate.avatar}
-                    alt={evaluate.email}
-                    width={12}
-                    height={12}
-                    objectFit="cover"
-                    className="w-12 h-12 border-4 border-blue-500 rounded-full mr-2"
-                    loading="lazy"
-                    unoptimized
-                  />
-                  <div>
+                  <div className="w-12 aspect-square relative">
+                    <Image
+                      src={evaluate.avatar}
+                      alt={evaluate.email}
+                      fill
+                      className="border-4 border-blue-500 rounded-full mr-2 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="ml-2">
                     <h3 className="font-bold leading-none">{evaluate.name}</h3>
                     <span className="text-gray-500 text-xs">
                       {evaluate.email}

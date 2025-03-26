@@ -5,14 +5,12 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import {
-  faChevronDown,
-  faEllipsis,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
+import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
 import { ManagementIcon } from "@/components/icon";
 import { useSidebar } from "@/context/sidebarContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import routes from "@/config";
 
 type NavItem = {
