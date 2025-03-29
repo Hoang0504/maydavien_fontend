@@ -13,7 +13,8 @@ function IntroduceSection({ id }: { id: string }) {
 
   const fetchIntroducesData = async () => {
     setLoading(true);
-    const data = await getIntroduces();
+    const data = await getIntroduces({ mode: "all-active" });
+
     setIntroduces(data.data);
     setLoading(false);
   };

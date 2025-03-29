@@ -58,7 +58,7 @@ function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Left Section */}
         <div className="flex flex-col items-center" ref={galleryRef}>
-          <div className="w-3/5 h-[400px] mb-4">
+          <div className="w-3/5 h-[400px] mb-4 relative">
             <Image
               src={product.image}
               alt={product.name}
